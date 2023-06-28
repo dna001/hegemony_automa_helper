@@ -1,0 +1,1 @@
+# hegemony_automa_hepler
