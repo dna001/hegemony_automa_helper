@@ -1,0 +1,28 @@
+name: hegemony_automa_helper
+description:
+  Helper application for Hegemony with Crisis & Control expansion when using advances Automa(s).
+
+publish_to: "none"
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.0.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.2
+  provider: ^5.0.0
+  url_launcher: ^6.1.8
+  shared_preferences: ^2.1.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true

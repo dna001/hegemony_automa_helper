@@ -1,0 +1,394 @@
+// Copyright 2023 Daniel Nygren. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../data/app_state.dart';
+
+const rowDivider = SizedBox(width: 20);
+const colDivider = SizedBox(height: 10);
+const tinySpacing = 3.0;
+const smallSpacing = 10.0;
+const double cardWidth = 115;
+const double widthConstraint = 450;
+
+class PriorityCardData {
+  final int id;
+  final int priority;
+
+  PriorityCardData(this.id, this.priority);
+}
+
+class AutomaScreen extends StatelessWidget {
+  const AutomaScreen({super.key, this.className = ClassNames.Worker});
+  final ClassNames className;
+
+  void onPolicyButtonPressed(BuildContext context, int id) {
+    context.read<AppState>().incPolicyPriority(className, id);
+  }
+
+  void onActionButtonPressed(BuildContext context, int id) {
+    context.read<AppState>().incActionPriority(className, id);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final AppState appState = context.watch<AppState>();
+    final List<PriorityState> policyStateList =
+        appState.getPolicyList(className);
+    // Add Policy Priority Cards to grid
+    List<List<PriorityCardData>> policyPriorityCardsList =
+        <List<PriorityCardData>>[];
+    int oldPriority = policyStateList[0].priority;
+    List<PriorityCardData> stateList = [];
+    for (int i = 0; i < policyStateList.length; i++) {
+      if (oldPriority != policyStateList[i].priority) {
+        policyPriorityCardsList.add(stateList);
+        stateList = [];
+        oldPriority = policyStateList[i].priority;
+      }
+      if (policyStateList[i].priority >= 0) {
+        stateList.add(PriorityCardData(
+            policyStateList[i].id, policyStateList[i].priority));
+      }
+    }
+    if (stateList.length > 0) {
+      policyPriorityCardsList.add(stateList);
+    }
+    List<Widget> policySlivers = [];
+    for (int i = 0; i < policyPriorityCardsList.length; i++) {
+      policySlivers.add(PriorityGrid(
+          priorityCardIds: policyPriorityCardsList[i],
+          priorityCardsInfo: policyPriorityCards,
+          count: 7));
+    }
+    // Add Action Priority Cards to grid
+    List<PriorityState> actionStateList = appState.getActionList(className);
+    List<List<PriorityCardData>> actionPriorityCardsList =
+        <List<PriorityCardData>>[];
+    oldPriority = actionStateList[0].priority;
+    stateList = [];
+    for (int i = 0; i < actionStateList.length; i++) {
+      if (oldPriority != actionStateList[i].priority) {
+        actionPriorityCardsList.add(stateList);
+        stateList = [];
+        oldPriority = actionStateList[i].priority;
+      }
+      stateList.add(
+          PriorityCardData(actionStateList[i].id, actionStateList[i].priority));
+    }
+    if (stateList.length > 0) {
+      actionPriorityCardsList.add(stateList);
+    }
+    List<PriorityInfo> classInfo = actionPriorityCardsWC;
+    if (className == ClassNames.Capitalist) {
+      classInfo = actionPriorityCardsCC;
+    } else if (className == ClassNames.Middle) {
+      classInfo = actionPriorityCardsMC;
+    }
+    List<Widget> actionSlivers = [];
+    for (int i = 0; i < actionPriorityCardsList.length; i++) {
+      actionSlivers.add(PriorityGrid(
+          priorityCardIds: actionPriorityCardsList[i],
+          priorityCardsInfo: classInfo,
+          count: 6));
+    }
+
+    return Expanded(
+      child: CustomScrollView(slivers: [
+        SliverToBoxAdapter(
+          child: Padding(
+              padding: const EdgeInsets.fromLTRB(16.0, 20, 16.0, 0),
+              child: Row(children: [
+                FilledButton(
+                  onPressed: () => appState.resetPriorities(className),
+                  child: Text('Reset Priorities'),
+                ),
+                rowDivider,
+                FilledButton(
+                  onPressed: () => appState.flattenPriorities(className),
+                  child: Text('Flatten Priorities'),
+                ),
+              ])),
+        ),
+        PolicyButtons(className: className),
+        ActionButtons(className: className, classInfo: classInfo),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16.0, 20, 16.0, 0),
+            child: Text(
+              'Policy Priority',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+          ),
+        ),
+        ...policySlivers,
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16.0, 20, 16.0, 0),
+            child: Text(
+              'Action Priority',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+          ),
+        ),
+        ...actionSlivers,
+      ]),
+    );
+  }
+}
+
+class PolicyButtons extends StatelessWidget {
+  final ClassNames className;
+
+  const PolicyButtons({super.key, required this.className});
+
+  @override
+  Widget build(BuildContext context) {
+    final AppState appState = context.read<AppState>();
+    List<Widget> widgets = [];
+    for (int i = 0; i < 7; i++) {
+      widgets.add(Padding(
+          padding: const EdgeInsets.all(4),
+          child: FilledButton(
+            style: ButtonStyle(
+                backgroundColor:
+                    MaterialStateProperty.all(policyPriorityCards[i].color),
+                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                    RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                ))),
+            onPressed: () => appState.incPolicyPriority(className, i),
+            child: Text(policyPriorityCards[i].number.toString()),
+          )));
+    }
+
+    return SliverPadding(
+      padding: const EdgeInsets.all(4),
+      sliver: SliverLayoutBuilder(builder: (context, constraints) {
+        return SliverGrid.count(
+          childAspectRatio: 1.4,
+          crossAxisCount: 7,
+          children: widgets,
+        );
+      }),
+    );
+  }
+}
+
+class ActionButtons extends StatelessWidget {
+  final ClassNames className;
+  final List<PriorityInfo> classInfo;
+
+  const ActionButtons(
+      {super.key, required this.className, required this.classInfo});
+
+  @override
+  Widget build(BuildContext context) {
+    final AppState appState = context.read<AppState>();
+    List<Widget> widgets = [];
+    for (int i = 0; i < 6; i++) {
+      widgets.add(Padding(
+          padding: const EdgeInsets.all(4),
+          child: FilledButton(
+            style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all(classInfo[i].color),
+                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                    RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                ))),
+            onPressed: () => appState.incActionPriority(className, i),
+            child: Text(classInfo[i].shortName),
+          )));
+    }
+
+    return SliverPadding(
+      padding: const EdgeInsets.all(4),
+      sliver: SliverLayoutBuilder(builder: (context, constraints) {
+        return SliverGrid.count(
+          childAspectRatio: 1.4,
+          crossAxisCount: 6,
+          children: widgets,
+        );
+      }),
+    );
+  }
+}
+
+class PriorityGrid extends StatelessWidget {
+  const PriorityGrid(
+      {super.key,
+      this.priorityCardIds = const [],
+      this.priorityCardsInfo = const [],
+      this.count = 1});
+
+  final List<PriorityCardData> priorityCardIds;
+  final List<PriorityInfo> priorityCardsInfo;
+  final int count;
+
+  List<PriorityCard> priorityCards() {
+    return priorityCardIds
+        .map(
+          (priorityInfoId) => PriorityCard(
+            info: priorityCardsInfo[priorityInfoId.id],
+            priority: priorityInfoId.priority,
+          ),
+        )
+        .toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverPadding(
+      padding: const EdgeInsets.all(4),
+      sliver: SliverLayoutBuilder(builder: (context, constraints) {
+        return SliverGrid.count(
+          childAspectRatio: 1.4,
+          crossAxisCount: count,
+          children: priorityCards(),
+        );
+      }),
+    );
+  }
+}
+
+class PriorityCard extends StatefulWidget {
+  const PriorityCard({super.key, required this.info, required this.priority});
+
+  final PriorityInfo info;
+  final int priority;
+
+  @override
+  State<PriorityCard> createState() => _PriorityCardState();
+}
+
+class _PriorityCardState extends State<PriorityCard> {
+  late int _priorityValue;
+
+  @override
+  void initState() {
+    super.initState();
+    _priorityValue = 0;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    const BorderRadius borderRadius = BorderRadius.all(Radius.circular(4.0));
+    final Color color = widget.info.color;
+    final int priority = widget.priority;
+
+    return Padding(
+        padding: const EdgeInsets.all(4.0),
+        child: Material(
+          borderRadius: borderRadius,
+          elevation: 5.0,
+          color: color,
+          shadowColor: Theme.of(context).colorScheme.shadow,
+          surfaceTintColor: null,
+          type: MaterialType.card,
+          child: Badge(
+            label: Text(priority.toString()),
+            child: Padding(
+              padding: const EdgeInsets.all(4.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  widget.info.number > 0
+                      ? Text(
+                          '${widget.info.number}',
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineSmall!
+                              .copyWith(color: Colors.white),
+                        )
+                      : Text(
+                          '',
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineSmall!
+                              .copyWith(color: Colors.white),
+                        ),
+                  SizedBox(width: 8),
+                  Text(
+                    '${widget.info.shortName}',
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyMedium!
+                        .copyWith(color: Colors.white),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ));
+  }
+}
+
+class PriorityInfo {
+  const PriorityInfo(this.number, this.name, this.shortName, this.color);
+  final int number;
+  final String name;
+  final String shortName;
+  final Color color;
+}
+
+const List<PriorityInfo> policyPriorityCards = <PriorityInfo>[
+  PriorityInfo(1, "Fiscal Policy", "FP", Colors.blue),
+  PriorityInfo(2, "Labor Market", "LM", Colors.deepPurple),
+  PriorityInfo(3, "Taxation", "T", Colors.purple),
+  PriorityInfo(4, "Healthcare & Benefits", "HB", Colors.red),
+  PriorityInfo(5, "Education", "E", Colors.orange),
+  PriorityInfo(6, "Foreign Trade", "FT", Colors.brown),
+  PriorityInfo(7, "Immigration", "I", Color.fromARGB(255, 128, 128, 128)),
+];
+
+const List<PriorityInfo> actionPriorityCardsWC = <PriorityInfo>[
+  PriorityInfo(0, "Assign Workers", "AW", Colors.yellow),
+  PriorityInfo(0, "Buy Goods & Services", "BGS", Colors.green),
+  PriorityInfo(0, "Propose Bill", "PB", Colors.blueGrey),
+  PriorityInfo(0, "Special Action", "SA", Colors.pink),
+  PriorityInfo(0, "Strike", "STR", Colors.red),
+  PriorityInfo(0, "Demonstration", "DEM", Color.fromARGB(255, 179, 27, 0)),
+];
+
+const List<PriorityInfo> actionPriorityCardsCC = <PriorityInfo>[
+  PriorityInfo(0, "Build Company", "BC", Colors.blue),
+  PriorityInfo(0, "Sell To The Foreign Market", "SFM", Colors.red),
+  PriorityInfo(0, "Propose Bill", "PB", Colors.blueGrey),
+  PriorityInfo(0, "Special Action", "SA", Colors.pink),
+  PriorityInfo(0, "Lobby", "LOB", Colors.purple),
+  PriorityInfo(0, "Sell Company", "SC", Colors.orange),
+];
+
+const List<PriorityInfo> actionPriorityCardsMC = <PriorityInfo>[
+  PriorityInfo(0, "Buy Goods & Services", "BGS", Colors.green),
+  PriorityInfo(0, "Build Company", "BC", Colors.blue),
+  PriorityInfo(0, "Assign Workers", "AW", Colors.yellow),
+  PriorityInfo(0, "Special Action", "SA", Colors.pink),
+  PriorityInfo(0, "Sell To The Foreign Market", "SFM", Colors.red),
+  PriorityInfo(0, "Propose Bill", "PB", Colors.blueGrey),
+];
+
+enum ColorItem {
+  red('red', Colors.red),
+  orange('orange', Colors.orange),
+  yellow('yellow', Colors.yellow),
+  green('green', Colors.green),
+  blue('blue', Colors.blue),
+  indigo('indigo', Colors.indigo),
+  violet('violet', Color(0xFF8F00FF)),
+  purple('purple', Colors.purple),
+  pink('pink', Colors.pink),
+  silver('silver', Color(0xFF808080)),
+  gold('gold', Color(0xFFFFD700)),
+  beige('beige', Color(0xFFF5F5DC)),
+  brown('brown', Colors.brown),
+  grey('grey', Colors.grey),
+  black('black', Colors.black),
+  white('white', Colors.white);
+
+  const ColorItem(this.label, this.color);
+  final String label;
+  final Color color;
+}
