@@ -61,6 +61,7 @@ class AutomaScreen extends StatelessWidget {
       policySlivers.add(PriorityGrid(
           priorityCardIds: policyPriorityCardsList[i],
           priorityCardsInfo: policyPriorityCards,
+          className: className,
           count: 7));
     }
     // Add Action Priority Cards to grid
@@ -92,6 +93,7 @@ class AutomaScreen extends StatelessWidget {
       actionSlivers.add(PriorityGrid(
           priorityCardIds: actionPriorityCardsList[i],
           priorityCardsInfo: classInfo,
+          className: className,
           count: 6));
     }
 
@@ -109,6 +111,16 @@ class AutomaScreen extends StatelessWidget {
                 FilledButton(
                   onPressed: () => appState.flattenPriorities(className),
                   child: Text('Flatten Priorities'),
+                ),
+              ])),
+        ),
+        SliverToBoxAdapter(
+          child: Padding(
+              padding: const EdgeInsets.fromLTRB(16.0, 20, 16.0, 0),
+              child: Row(children: [
+                FilledButton(
+                  onPressed: () => appState.undo(className),
+                  child: Text('Undo'),
                 ),
               ])),
         ),
@@ -169,7 +181,7 @@ class PolicyButtons extends StatelessWidget {
       sliver: SliverLayoutBuilder(builder: (context, constraints) {
         return SliverGrid.count(
           childAspectRatio: 1.4,
-          crossAxisCount: 7,
+          crossAxisCount: 5,
           children: widgets,
         );
       }),
@@ -208,7 +220,7 @@ class ActionButtons extends StatelessWidget {
       sliver: SliverLayoutBuilder(builder: (context, constraints) {
         return SliverGrid.count(
           childAspectRatio: 1.4,
-          crossAxisCount: 6,
+          crossAxisCount: 5,
           children: widgets,
         );
       }),
@@ -219,12 +231,14 @@ class ActionButtons extends StatelessWidget {
 class PriorityGrid extends StatelessWidget {
   const PriorityGrid(
       {super.key,
-      this.priorityCardIds = const [],
-      this.priorityCardsInfo = const [],
+      required this.priorityCardIds,
+      required this.priorityCardsInfo,
+      required this.className,
       this.count = 1});
 
   final List<PriorityCardData> priorityCardIds;
   final List<PriorityInfo> priorityCardsInfo;
+  final ClassNames className;
   final int count;
 
   List<PriorityCard> priorityCards() {
@@ -233,6 +247,7 @@ class PriorityGrid extends StatelessWidget {
           (priorityInfoId) => PriorityCard(
             info: priorityCardsInfo[priorityInfoId.id],
             priority: priorityInfoId.priority,
+            className: className,
           ),
         )
         .toList();
@@ -254,10 +269,15 @@ class PriorityGrid extends StatelessWidget {
 }
 
 class PriorityCard extends StatefulWidget {
-  const PriorityCard({super.key, required this.info, required this.priority});
+  const PriorityCard(
+      {super.key,
+      required this.info,
+      required this.priority,
+      required this.className});
 
   final PriorityInfo info;
   final int priority;
+  final ClassNames className;
 
   @override
   State<PriorityCard> createState() => _PriorityCardState();
@@ -277,6 +297,7 @@ class _PriorityCardState extends State<PriorityCard> {
     const BorderRadius borderRadius = BorderRadius.all(Radius.circular(4.0));
     final Color color = widget.info.color;
     final int priority = widget.priority;
+    final AppState appState = context.read<AppState>();
 
     return Padding(
         padding: const EdgeInsets.all(4.0),
@@ -289,7 +310,23 @@ class _PriorityCardState extends State<PriorityCard> {
           type: MaterialType.card,
           child: Badge(
             label: Text(priority.toString()),
-            child: Padding(
+            child: FilledButton(
+              style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(color),
+                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ))),
+              onPressed: widget.info.number > 0
+                  ? () =>
+                      appState.removePolicy(widget.className, widget.info.id)
+                  : () => appState.decActionPriority(
+                      widget.className, widget.info.id),
+              child: Text(widget.info.number > 0
+                  ? widget.info.number.toString()
+                  : widget.info.shortName),
+            ),
+            /*Padding(
               padding: const EdgeInsets.all(4.0),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -319,55 +356,57 @@ class _PriorityCardState extends State<PriorityCard> {
                   ),
                 ],
               ),
-            ),
+            ),*/
           ),
         ));
   }
 }
 
 class PriorityInfo {
-  const PriorityInfo(this.number, this.name, this.shortName, this.color);
+  const PriorityInfo(
+      this.number, this.name, this.shortName, this.color, this.id);
   final int number;
   final String name;
   final String shortName;
   final Color color;
+  final int id;
 }
 
 const List<PriorityInfo> policyPriorityCards = <PriorityInfo>[
-  PriorityInfo(1, "Fiscal Policy", "FP", Colors.blue),
-  PriorityInfo(2, "Labor Market", "LM", Colors.deepPurple),
-  PriorityInfo(3, "Taxation", "T", Colors.purple),
-  PriorityInfo(4, "Healthcare & Benefits", "HB", Colors.red),
-  PriorityInfo(5, "Education", "E", Colors.orange),
-  PriorityInfo(6, "Foreign Trade", "FT", Colors.brown),
-  PriorityInfo(7, "Immigration", "I", Color.fromARGB(255, 128, 128, 128)),
+  PriorityInfo(1, "Fiscal Policy", "FP", Colors.blue, 0),
+  PriorityInfo(2, "Labor Market", "LM", Colors.deepPurple, 1),
+  PriorityInfo(3, "Taxation", "T", Colors.purple, 2),
+  PriorityInfo(4, "Healthcare & Benefits", "HB", Colors.red, 3),
+  PriorityInfo(5, "Education", "E", Colors.orange, 4),
+  PriorityInfo(6, "Foreign Trade", "FT", Colors.brown, 5),
+  PriorityInfo(7, "Immigration", "I", Color.fromARGB(255, 128, 128, 128), 6),
 ];
 
 const List<PriorityInfo> actionPriorityCardsWC = <PriorityInfo>[
-  PriorityInfo(0, "Assign Workers", "AW", Colors.yellow),
-  PriorityInfo(0, "Buy Goods & Services", "BGS", Colors.green),
-  PriorityInfo(0, "Propose Bill", "PB", Colors.blueGrey),
-  PriorityInfo(0, "Special Action", "SA", Colors.pink),
-  PriorityInfo(0, "Strike", "STR", Colors.red),
-  PriorityInfo(0, "Demonstration", "DEM", Color.fromARGB(255, 179, 27, 0)),
+  PriorityInfo(0, "Assign Workers", "AW", Colors.yellow, 0),
+  PriorityInfo(0, "Buy Goods & Services", "BGS", Colors.green, 1),
+  PriorityInfo(0, "Propose Bill", "PB", Colors.blueGrey, 2),
+  PriorityInfo(0, "Special Action", "SA", Colors.pink, 3),
+  PriorityInfo(0, "Strike", "STR", Colors.red, 4),
+  PriorityInfo(0, "Demonstration", "DEM", Color.fromARGB(255, 179, 27, 0), 5),
 ];
 
 const List<PriorityInfo> actionPriorityCardsCC = <PriorityInfo>[
-  PriorityInfo(0, "Build Company", "BC", Colors.blue),
-  PriorityInfo(0, "Sell To The Foreign Market", "SFM", Colors.red),
-  PriorityInfo(0, "Propose Bill", "PB", Colors.blueGrey),
-  PriorityInfo(0, "Special Action", "SA", Colors.pink),
-  PriorityInfo(0, "Lobby", "LOB", Colors.purple),
-  PriorityInfo(0, "Sell Company", "SC", Colors.orange),
+  PriorityInfo(0, "Build Company", "BC", Colors.blue, 0),
+  PriorityInfo(0, "Sell To The Foreign Market", "SFM", Colors.red, 1),
+  PriorityInfo(0, "Propose Bill", "PB", Colors.blueGrey, 2),
+  PriorityInfo(0, "Special Action", "SA", Colors.pink, 3),
+  PriorityInfo(0, "Lobby", "LOB", Colors.purple, 4),
+  PriorityInfo(0, "Sell Company", "SC", Colors.orange, 5),
 ];
 
 const List<PriorityInfo> actionPriorityCardsMC = <PriorityInfo>[
-  PriorityInfo(0, "Buy Goods & Services", "BGS", Colors.green),
-  PriorityInfo(0, "Build Company", "BC", Colors.blue),
-  PriorityInfo(0, "Assign Workers", "AW", Colors.yellow),
-  PriorityInfo(0, "Special Action", "SA", Colors.pink),
-  PriorityInfo(0, "Sell To The Foreign Market", "SFM", Colors.red),
-  PriorityInfo(0, "Propose Bill", "PB", Colors.blueGrey),
+  PriorityInfo(0, "Buy Goods & Services", "BGS", Colors.green, 0),
+  PriorityInfo(0, "Build Company", "BC", Colors.blue, 1),
+  PriorityInfo(0, "Assign Workers", "AW", Colors.yellow, 2),
+  PriorityInfo(0, "Special Action", "SA", Colors.pink, 3),
+  PriorityInfo(0, "Sell To The Foreign Market", "SFM", Colors.red, 4),
+  PriorityInfo(0, "Propose Bill", "PB", Colors.blueGrey, 5),
 ];
 
 enum ColorItem {

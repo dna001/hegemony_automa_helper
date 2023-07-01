@@ -18,8 +18,9 @@ enum PolicyState { A, B, C }
 class PolicyCardData {
   final int id;
   final PolicyState state;
+  bool active;
 
-  PolicyCardData(this.id, this.state);
+  PolicyCardData(this.id, this.state, this.active);
 }
 
 class OverviewScreen extends StatelessWidget {
@@ -29,13 +30,27 @@ class OverviewScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final AppState appState = context.watch<AppState>();
     List<PolicyCardData> policyCardsList = [
-      PolicyCardData(0, PolicyState.C),
-      PolicyCardData(1, PolicyState.B),
-      PolicyCardData(2, PolicyState.A),
-      PolicyCardData(3, PolicyState.B),
-      PolicyCardData(4, PolicyState.C),
-      PolicyCardData(5, PolicyState.B),
-      PolicyCardData(6, PolicyState.B)
+      PolicyCardData(0, PolicyState.A, false),
+      PolicyCardData(0, PolicyState.B, false),
+      PolicyCardData(0, PolicyState.C, true),
+      PolicyCardData(1, PolicyState.A, false),
+      PolicyCardData(1, PolicyState.B, true),
+      PolicyCardData(1, PolicyState.C, false),
+      PolicyCardData(2, PolicyState.A, true),
+      PolicyCardData(2, PolicyState.B, false),
+      PolicyCardData(2, PolicyState.C, false),
+      PolicyCardData(3, PolicyState.A, false),
+      PolicyCardData(3, PolicyState.B, true),
+      PolicyCardData(3, PolicyState.C, false),
+      PolicyCardData(4, PolicyState.A, false),
+      PolicyCardData(4, PolicyState.B, false),
+      PolicyCardData(4, PolicyState.C, true),
+      PolicyCardData(5, PolicyState.A, false),
+      PolicyCardData(5, PolicyState.B, true),
+      PolicyCardData(5, PolicyState.C, false),
+      PolicyCardData(6, PolicyState.A, false),
+      PolicyCardData(6, PolicyState.B, true),
+      PolicyCardData(6, PolicyState.C, false),
     ];
 
     return Expanded(
@@ -52,7 +67,12 @@ class OverviewScreen extends StatelessWidget {
                 FilledButton(
                   onPressed: () => appState.save(),
                   child: Text('Save'),
-                )
+                ),
+                rowDivider,
+                FilledButton(
+                  onPressed: () => appState.clear(),
+                  child: Text('Clear'),
+                ),
               ])),
         ),
         SliverToBoxAdapter(
@@ -103,11 +123,12 @@ class PolicyGrid extends StatelessWidget {
   final List<PolicyCardData> policyCardIds;
 
   List<PolicyCard> policyCardsList() {
-    return policyCards
+    return policyCardIds
         .map(
-          (cardInfo) => PolicyCard(
-            info: cardInfo,
-            state: policyCardIds[cardInfo.number - 1].state,
+          (policyCardData) => PolicyCard(
+            info: policyCards[policyCardData.id],
+            state: policyCardData.state,
+            active: policyCardData.active,
           ),
         )
         .toList();
@@ -120,7 +141,7 @@ class PolicyGrid extends StatelessWidget {
       sliver: SliverLayoutBuilder(builder: (context, constraints) {
         return SliverGrid.count(
           childAspectRatio: 1.4,
-          crossAxisCount: 7,
+          crossAxisCount: 3,
           children: policyCardsList(),
         );
       }),
@@ -129,10 +150,15 @@ class PolicyGrid extends StatelessWidget {
 }
 
 class PolicyCard extends StatefulWidget {
-  const PolicyCard({super.key, required this.info, required this.state});
+  const PolicyCard(
+      {super.key,
+      required this.info,
+      required this.state,
+      required this.active});
 
   final CardInfo info;
   final PolicyState state;
+  final bool active;
 
   @override
   State<PolicyCard> createState() => _PolicyCardState();
@@ -164,7 +190,7 @@ class _PolicyCardState extends State<PolicyCard> {
         child: Material(
           borderRadius: borderRadius,
           elevation: 5.0,
-          color: color,
+          color: widget.active ? color : Colors.transparent,
           shadowColor: Theme.of(context).colorScheme.shadow,
           surfaceTintColor: null,
           type: MaterialType.card,
@@ -184,7 +210,8 @@ class _PolicyCardState extends State<PolicyCard> {
                   ),
                   SizedBox(width: 8),
                   Text(
-                    '${widget.info.shortName}',
+                    softWrap: true,
+                    '${widget.info.name}',
                     style: Theme.of(context)
                         .textTheme
                         .bodyMedium!
@@ -210,7 +237,7 @@ const List<CardInfo> policyCards = <CardInfo>[
   CardInfo(1, "Fiscal Policy", "FP", Colors.blue),
   CardInfo(2, "Labor Market", "LM", Colors.deepPurple),
   CardInfo(3, "Taxation", "T", Colors.purple),
-  CardInfo(4, "Healthcare & Benefits", "HB", Colors.red),
+  CardInfo(4, "Healthcare\n&\nBenefits", "HB", Colors.red),
   CardInfo(5, "Education", "E", Colors.orange),
   CardInfo(6, "Foreign Trade", "FT", Colors.brown),
   CardInfo(7, "Immigration", "I", Color.fromARGB(255, 128, 128, 128)),
