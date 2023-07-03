@@ -14,6 +14,7 @@ class PriorityState {
 }
 
 class AppState extends ChangeNotifier {
+  int saveSlot = 0;
   List<PriorityState> _policyListWC = [];
   List<PriorityState> _policyListCC = [];
   List<PriorityState> _policyListMC = [];
@@ -28,15 +29,19 @@ class AppState extends ChangeNotifier {
   List<List<PriorityState>> _undoActionListMC = [];
 
   AppState() {
-    resetPolicies(ClassNames.Worker);
-    resetPolicies(ClassNames.Capitalist);
-    resetPolicies(ClassNames.Middle);
-    resetActions(ClassNames.Worker);
-    resetActions(ClassNames.Capitalist);
-    resetActions(ClassNames.Middle);
+    _resetPolicies(ClassNames.Worker);
+    _resetPolicies(ClassNames.Capitalist);
+    _resetPolicies(ClassNames.Middle);
+    _resetActions(ClassNames.Worker);
+    _resetActions(ClassNames.Capitalist);
+    _resetActions(ClassNames.Middle);
   }
 
-  void resetPolicies(ClassNames className) {
+  Future<void> init() async {
+    await setSaveSlot(0);
+  }
+
+  void _resetPolicies(ClassNames className) {
     switch (className) {
       case ClassNames.Worker:
         _policyListWC = [
@@ -74,7 +79,7 @@ class AppState extends ChangeNotifier {
     }
   }
 
-  void resetActions(ClassNames className) {
+  void _resetActions(ClassNames className) {
     switch (className) {
       case ClassNames.Worker:
         _actionListWC = [
@@ -131,6 +136,13 @@ class AppState extends ChangeNotifier {
     }
   }
 
+  Future<void> setSaveSlot(int slot) async {
+    // Set save slot and load state
+    saveSlot = slot;
+    await load(slot: slot);
+    notifyListeners();
+  }
+
   Future<void> _loadPriorities(
       SharedPreferences prefs,
       List<PriorityState> priorityList,
@@ -152,42 +164,105 @@ class AppState extends ChangeNotifier {
 
   Future<void> load({int slot = 0}) async {
     final prefs = await SharedPreferences.getInstance();
-    _policyListWC = [];
-    _policyListCC = [];
-    _policyListMC = [];
-    _actionListWC = [];
-    _actionListCC = [];
-    _actionListMC = [];
-    _loadPriorities(prefs, _policyListWC, "policy_wc", 7, slot);
-    _loadPriorities(prefs, _policyListCC, "policy_cc", 7, slot);
-    _loadPriorities(prefs, _policyListMC, "policy_mc", 7, slot);
-    _loadPriorities(prefs, _actionListWC, "action_wc", 6, slot);
-    _loadPriorities(prefs, _actionListCC, "action_cc", 6, slot);
-    _loadPriorities(prefs, _actionListMC, "action_mc", 6, slot);
-    notifyListeners();
+    // Check if slot used before loading
+    int foundKeys = 0;
+    String wcKey = slot.toString() + "_policy_wc_order_0";
+    if (prefs.containsKey(wcKey)) {
+      _policyListWC = [];
+      _actionListWC = [];
+      _loadPriorities(prefs, _policyListWC, "policy_wc", 7, slot);
+      _loadPriorities(prefs, _actionListWC, "action_wc", 6, slot);
+      print("Loaded WC for slot " + slot.toString());
+      foundKeys++;
+    }
+    String ccKey = slot.toString() + "_policy_cc_order_0";
+    if (prefs.containsKey(ccKey)) {
+      _policyListCC = [];
+      _actionListCC = [];
+      _loadPriorities(prefs, _policyListCC, "policy_cc", 7, slot);
+      _loadPriorities(prefs, _actionListCC, "action_cc", 6, slot);
+      print("Loaded CC for slot " + slot.toString());
+      foundKeys++;
+    }
+    String mcKey = slot.toString() + "_policy_mc_order_0";
+    if (prefs.containsKey(mcKey)) {
+      _policyListMC = [];
+      _actionListMC = [];
+      _loadPriorities(prefs, _policyListMC, "policy_mc", 7, slot);
+      _loadPriorities(prefs, _actionListMC, "action_mc", 6, slot);
+      print("Loaded MC for slot " + slot.toString());
+      foundKeys++;
+    }
+    if (foundKeys == 0) {
+      print("Slot " + slot.toString() + " is empty");
+    }
+    // Clear undo history
+    _undoPolicyListWC.clear();
+    _undoPolicyListCC.clear();
+    _undoPolicyListMC.clear();
+    _undoActionListWC.clear();
+    _undoActionListCC.clear();
+    _undoActionListMC.clear();
   }
 
-  void savePriorities(SharedPreferences prefs, List<PriorityState> priorityList,
-      String typeAndClass, int slot) {
+  void _savePriorities(
+      SharedPreferences prefs,
+      List<PriorityState> lastPriorityList,
+      List<PriorityState> priorityList,
+      String typeAndClass,
+      int slot,
+      bool saveAll) {
+    if (saveAll) {
+      print("Save all");
+    }
     for (int i = 0; i < priorityList.length; i++) {
       int id = priorityList[i].id;
       String orderKey =
           slot.toString() + "_" + typeAndClass + "_order_" + i.toString();
       String priorityKey =
           slot.toString() + "_" + typeAndClass + "_priority_" + id.toString();
-      prefs.setInt(orderKey, id);
-      prefs.setInt(priorityKey, priorityList[i].priority);
+      // Only save if changed. Compare with lastPriorityList.
+      if (saveAll ||
+          (lastPriorityList[i].priority != priorityList[i].priority) ||
+          (lastPriorityList[i].id != priorityList[i].id)) {
+        prefs.setInt(orderKey, id);
+        prefs.setInt(priorityKey, priorityList[i].priority);
+        print("Saving " + orderKey + ":" + id.toString());
+        print("Saving " +
+            priorityKey +
+            ":" +
+            priorityList[i].priority.toString());
+      }
     }
   }
 
-  Future<void> save({int slot = 0}) async {
+  Future<void> save(ClassNames cls,
+      {List<PriorityState>? undoPolicyPriorityList,
+      List<PriorityState>? undoActionPriorityList}) async {
     final prefs = await SharedPreferences.getInstance();
-    savePriorities(prefs, _policyListWC, "policy_wc", slot);
-    savePriorities(prefs, _policyListCC, "policy_cc", slot);
-    savePriorities(prefs, _policyListMC, "policy_mc", slot);
-    savePriorities(prefs, _actionListWC, "action_wc", slot);
-    savePriorities(prefs, _actionListCC, "action_cc", slot);
-    savePriorities(prefs, _actionListMC, "action_mc", slot);
+    // Check if slot is used
+    if (cls == ClassNames.Worker) {
+      String testKey = saveSlot.toString() + "_policy_wc_order_0";
+      bool slotUsed = prefs.containsKey(testKey);
+      _savePriorities(prefs, undoPolicyPriorityList ?? _undoPolicyListWC.last,
+          _policyListWC, "policy_wc", saveSlot, !slotUsed);
+      _savePriorities(prefs, undoActionPriorityList ?? _undoActionListWC.last,
+          _actionListWC, "action_wc", saveSlot, !slotUsed);
+    } else if (cls == ClassNames.Capitalist) {
+      String testKey = saveSlot.toString() + "_policy_cc_order_0";
+      bool slotUsed = prefs.containsKey(testKey);
+      _savePriorities(prefs, undoPolicyPriorityList ?? _undoPolicyListCC.last,
+          _policyListCC, "policy_cc", saveSlot, !slotUsed);
+      _savePriorities(prefs, undoActionPriorityList ?? _undoActionListCC.last,
+          _actionListCC, "action_cc", saveSlot, !slotUsed);
+    } else if (cls == ClassNames.Middle) {
+      String testKey = saveSlot.toString() + "_policy_mc_order_0";
+      bool slotUsed = prefs.containsKey(testKey);
+      _savePriorities(prefs, undoPolicyPriorityList ?? _undoPolicyListMC.last,
+          _policyListMC, "policy_mc", saveSlot, !slotUsed);
+      _savePriorities(prefs, undoActionPriorityList ?? _undoActionListMC.last,
+          _actionListMC, "action_mc", saveSlot, !slotUsed);
+    }
   }
 
   Future<void> clear() async {
@@ -195,8 +270,8 @@ class AppState extends ChangeNotifier {
     await prefs.clear();
   }
 
-  void incPolicyPriority(ClassNames cls, int id) {
-    storeUndoInfo(cls);
+  Future<void> incPolicyPriority(ClassNames cls, int id) async {
+    _storeUndoInfo(cls);
     List<PriorityState> policyList = getPolicyList(cls);
     for (PriorityState state in policyList) {
       if (state.id == id) {
@@ -205,11 +280,12 @@ class AppState extends ChangeNotifier {
     }
     // Reorder list
     policyList.sort((a, b) => b.priority.compareTo(a.priority));
+    await save(cls);
     notifyListeners();
   }
 
-  void removePolicy(ClassNames cls, int id) {
-    storeUndoInfo(cls);
+  Future<void> removePolicy(ClassNames cls, int id) async {
+    _storeUndoInfo(cls);
     List<PriorityState> policyList = getPolicyList(cls);
     for (PriorityState state in policyList) {
       if (state.id == id) {
@@ -218,11 +294,12 @@ class AppState extends ChangeNotifier {
     }
     // Reorder list
     policyList.sort((a, b) => b.priority.compareTo(a.priority));
+    await save(cls);
     notifyListeners();
   }
 
-  void incActionPriority(ClassNames cls, int id) {
-    storeUndoInfo(cls);
+  Future<void> incActionPriority(ClassNames cls, int id) async {
+    _storeUndoInfo(cls);
     List<PriorityState> actionList = getActionList(cls);
     for (PriorityState state in actionList) {
       if (state.id == id) {
@@ -231,11 +308,12 @@ class AppState extends ChangeNotifier {
     }
     // Reorder list
     actionList.sort((a, b) => b.priority.compareTo(a.priority));
+    await save(cls);
     notifyListeners();
   }
 
-  void decActionPriority(ClassNames cls, int id) {
-    storeUndoInfo(cls);
+  Future<void> decActionPriority(ClassNames cls, int id) async {
+    _storeUndoInfo(cls);
     List<PriorityState> actionList = getActionList(cls);
     PriorityState foundState = PriorityState(0, 0);
     for (PriorityState state in actionList) {
@@ -252,17 +330,19 @@ class AppState extends ChangeNotifier {
     actionList.sort((a, b) => b.priority.compareTo(a.priority));
     foundState.priority += 1;
     actionList.sort((a, b) => b.priority.compareTo(a.priority));
+    await save(cls);
     notifyListeners();
   }
 
-  void resetPriorities(ClassNames cls) {
-    storeUndoInfo(cls);
-    resetPolicies(cls);
-    resetActions(cls);
+  Future<void> resetPriorities(ClassNames cls) async {
+    _storeUndoInfo(cls);
+    _resetPolicies(cls);
+    _resetActions(cls);
+    await save(cls);
     notifyListeners();
   }
 
-  void flattenPrioritiesHelper(List<PriorityState> priorityList) {
+  void _flattenPrioritiesHelper(List<PriorityState> priorityList) {
     // Count number of different priorities
     int numDiffPriorities = 0;
     int oldPriority = 255;
@@ -285,10 +365,11 @@ class AppState extends ChangeNotifier {
     }
   }
 
-  void flattenPriorities(ClassNames cls) {
-    storeUndoInfo(cls);
-    flattenPrioritiesHelper(getPolicyList(cls));
-    flattenPrioritiesHelper(getActionList(cls));
+  Future<void> flattenPriorities(ClassNames cls) async {
+    _storeUndoInfo(cls);
+    _flattenPrioritiesHelper(getPolicyList(cls));
+    _flattenPrioritiesHelper(getActionList(cls));
+    await save(cls);
     notifyListeners();
   }
 
@@ -321,9 +402,13 @@ class AppState extends ChangeNotifier {
       copy.add(PriorityState(state.id, state.priority));
     }
     undoPriorityList.add(copy);
+    if (undoPriorityList.length > 50) {
+      // Discard oldest undo history
+      undoPriorityList.removeAt(0);
+    }
   }
 
-  void storeUndoInfo(ClassNames className) {
+  void _storeUndoInfo(ClassNames className) {
     // Store policy undo history
     _storeUndoInfoHelper(
         _getUndoPolicyList(className), getPolicyList(className));
@@ -339,16 +424,23 @@ class AppState extends ChangeNotifier {
       currentPriorityList.clear();
       currentPriorityList.addAll(lastPriorityList);
     }
-    if (undoPriorityList.length > 50) {
-      // Discard oldest undo history
-      undoPriorityList.removeAt(0);
-    }
   }
 
-  void undo(ClassNames className) {
+  Future<void> undo(ClassNames cls) async {
     // Undo last action
-    _undoHelper(_getUndoPolicyList(className), getPolicyList(className));
-    _undoHelper(_getUndoActionList(className), getActionList(className));
+    List<PriorityState> oldPolicyPriorityList = [];
+    for (PriorityState state in getPolicyList(cls)) {
+      oldPolicyPriorityList.add(PriorityState(state.id, state.priority));
+    }
+    _undoHelper(_getUndoPolicyList(cls), getPolicyList(cls));
+    List<PriorityState> oldActionPriorityList = [];
+    for (PriorityState state in getActionList(cls)) {
+      oldActionPriorityList.add(PriorityState(state.id, state.priority));
+    }
+    _undoHelper(_getUndoActionList(cls), getActionList(cls));
+    await save(cls,
+        undoPolicyPriorityList: oldPolicyPriorityList,
+        undoActionPriorityList: oldActionPriorityList);
     notifyListeners();
   }
 }

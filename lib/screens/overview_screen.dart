@@ -28,7 +28,7 @@ class OverviewScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final AppState appState = context.watch<AppState>();
+    //final AppState appState = context.watch<AppState>();
     List<PolicyCardData> policyCardsList = [
       PolicyCardData(0, PolicyState.A, false),
       PolicyCardData(0, PolicyState.B, false),
@@ -54,65 +54,126 @@ class OverviewScreen extends StatelessWidget {
     ];
 
     return Expanded(
-      child: CustomScrollView(slivers: [
-        SliverToBoxAdapter(
-          child: Padding(
-              padding: const EdgeInsets.fromLTRB(16.0, 20, 16.0, 0),
-              child: Row(children: [
-                FilledButton(
-                  onPressed: () => appState.load(),
-                  child: Text('Load'),
-                ),
-                rowDivider,
-                FilledButton(
-                  onPressed: () => appState.save(),
-                  child: Text('Save'),
-                ),
-                rowDivider,
-                FilledButton(
-                  onPressed: () => appState.clear(),
-                  child: Text('Clear'),
-                ),
-              ])),
+        child: CustomScrollView(slivers: [
+      SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16.0, 20, 16.0, 0),
+          child: SaveSlotButtons(),
+          /*Row(children: [
+              SaveSlotRadioButtons(),
+              rowDivider,
+              FilledButton(
+                onPressed: () => appState.load(),
+                child: Text('Load'),
+              ),
+              rowDivider,
+              FilledButton(
+                onPressed: () => appState.save(),
+                child: Text('Save'),
+              ),
+              rowDivider,
+              FilledButton(
+                onPressed: () => appState.clear(),
+                child: Text('Clear'),
+              ),
+            ])*/
         ),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16.0, 20, 16.0, 0),
-            child: Text(
-              'Policies',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
+      ),
+      SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16.0, 20, 16.0, 0),
+          child: Text(
+            'Policies',
+            style: Theme.of(context).textTheme.titleLarge,
           ),
         ),
-        PolicyGrid(policyCardIds: policyCardsList),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16.0, 20, 16.0, 0),
-            child: Text(
-              'State Area',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
+      ),
+      PolicyGrid(policyCardIds: policyCardsList),
+      SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16.0, 20, 16.0, 0),
+          child: Text(
+            'State Area',
+            style: Theme.of(context).textTheme.titleLarge,
           ),
         ),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16.0, 20, 16.0, 0),
-            child: Text(
-              'Capitalist Companies',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
+      ),
+      SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16.0, 20, 16.0, 0),
+          child: Text(
+            'Capitalist Companies',
+            style: Theme.of(context).textTheme.titleLarge,
           ),
         ),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16.0, 20, 16.0, 0),
-            child: Text(
-              'Middle Class Companies',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
+      ),
+      SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16.0, 20, 16.0, 0),
+          child: Text(
+            'Middle Class Companies',
+            style: Theme.of(context).textTheme.titleLarge,
           ),
         ),
-      ]),
+      ),
+    ]));
+  }
+}
+
+class SaveSlotButtons extends StatefulWidget {
+  const SaveSlotButtons({super.key});
+
+  @override
+  State<SaveSlotButtons> createState() => _SaveSlotButtonsState();
+}
+
+class _SaveSlotButtonsState extends State<SaveSlotButtons> {
+  int? _selectedSlot = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    final AppState appState = context.watch<AppState>();
+    final List<Widget> widgets = <Widget>[];
+    _selectedSlot = appState.saveSlot;
+    for (int i = 0; i < 5; i++) {
+      widgets.add(
+          /*ListTile(
+        title: Text(i.toString()),
+        leading: */
+          Radio<int>(
+        fillColor: MaterialStateColor.resolveWith((states) => Colors.white),
+        focusColor: MaterialStateColor.resolveWith((states) => Colors.white),
+        value: i,
+        groupValue: _selectedSlot,
+        onChanged: (value) {
+          appState.setSaveSlot(value ?? 0);
+        },
+        //),
+      ));
+    }
+
+    return Material(
+      borderRadius: BorderRadius.all(Radius.circular(10.0)),
+      color: Colors.blueGrey,
+      child: Row(
+        children: <Widget>[
+          rowDivider,
+          Text(
+            "Save Slot",
+            style: Theme.of(context)
+                .textTheme
+                .headlineSmall!
+                .copyWith(color: Colors.white),
+          ),
+          rowDivider,
+          ...widgets,
+          rowDivider,
+          FilledButton(
+            onPressed: () => appState.clear(),
+            child: Text('Clear'),
+          ),
+        ],
+      ),
     );
   }
 }

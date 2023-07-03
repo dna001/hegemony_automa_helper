@@ -50,25 +50,29 @@ class _AppState extends State<App> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Hegemony Automa Helper',
-      themeMode: themeMode,
-      theme: ThemeData(
-        colorSchemeSeed: colorSelected.color,
-        useMaterial3: useMaterial3,
-        brightness: Brightness.light,
-      ),
-      darkTheme: ThemeData(
-        colorSchemeSeed: colorSelected.color,
-        useMaterial3: useMaterial3,
-        brightness: Brightness.dark,
-      ),
-      home: Home(
-        useLightMode: useLightMode,
-        useMaterial3: useMaterial3,
-        colorSelected: colorSelected,
-      ),
-    );
+    return FutureBuilder(
+        future: context.read<AppState>().init(),
+        initialData: Center(child: CircularProgressIndicator()),
+        builder: (context, snapshot) {
+          return MaterialApp(
+              debugShowCheckedModeBanner: false,
+              title: 'Hegemony Automa Helper',
+              themeMode: themeMode,
+              theme: ThemeData(
+                colorSchemeSeed: colorSelected.color,
+                useMaterial3: useMaterial3,
+                brightness: Brightness.light,
+              ),
+              darkTheme: ThemeData(
+                colorSchemeSeed: colorSelected.color,
+                useMaterial3: useMaterial3,
+                brightness: Brightness.dark,
+              ),
+              home: Home(
+                useLightMode: useLightMode,
+                useMaterial3: useMaterial3,
+                colorSelected: colorSelected,
+              ));
+        });
   }
 }
