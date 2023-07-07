@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../data/app_state.dart';
+import '../data/automa_state.dart';
 
 const rowDivider = SizedBox(width: 20);
 const colDivider = SizedBox(height: 10);
@@ -25,18 +25,18 @@ class AutomaScreen extends StatelessWidget {
   final ClassNames className;
 
   void onPolicyButtonPressed(BuildContext context, int id) {
-    context.read<AppState>().incPolicyPriority(className, id);
+    context.read<AutomaState>().incPolicyPriority(className, id);
   }
 
   void onActionButtonPressed(BuildContext context, int id) {
-    context.read<AppState>().incActionPriority(className, id);
+    context.read<AutomaState>().incActionPriority(className, id);
   }
 
   @override
   Widget build(BuildContext context) {
-    final AppState appState = context.watch<AppState>();
+    final AutomaState automaState = context.watch<AutomaState>();
     final List<PriorityState> policyStateList =
-        appState.getPolicyList(className);
+        automaState.getPolicyList(className);
     // Add Policy Priority Cards to grid
     List<List<PriorityCardData>> policyPriorityCardsList =
         <List<PriorityCardData>>[];
@@ -65,7 +65,7 @@ class AutomaScreen extends StatelessWidget {
           count: 7));
     }
     // Add Action Priority Cards to grid
-    List<PriorityState> actionStateList = appState.getActionList(className);
+    List<PriorityState> actionStateList = automaState.getActionList(className);
     List<List<PriorityCardData>> actionPriorityCardsList =
         <List<PriorityCardData>>[];
     oldPriority = actionStateList[0].priority;
@@ -97,19 +97,20 @@ class AutomaScreen extends StatelessWidget {
           count: 6));
     }
 
-    return Expanded(
+    return SizedBox(
+      width: 450,
       child: CustomScrollView(slivers: [
         SliverToBoxAdapter(
           child: Padding(
               padding: const EdgeInsets.fromLTRB(16.0, 20, 16.0, 0),
               child: Row(children: [
                 FilledButton(
-                  onPressed: () => appState.resetPriorities(className),
+                  onPressed: () => automaState.resetPriorities(className),
                   child: Text('Reset Priorities'),
                 ),
                 rowDivider,
                 FilledButton(
-                  onPressed: () => appState.flattenPriorities(className),
+                  onPressed: () => automaState.flattenPriorities(className),
                   child: Text('Flatten Priorities'),
                 ),
               ])),
@@ -119,7 +120,7 @@ class AutomaScreen extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(16.0, 20, 16.0, 0),
               child: Row(children: [
                 FilledButton(
-                  onPressed: () => appState.undo(className),
+                  onPressed: () => automaState.undo(className),
                   child: Text('Undo'),
                 ),
               ])),
@@ -158,7 +159,7 @@ class PolicyButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final AppState appState = context.read<AppState>();
+    final AutomaState automaState = context.read<AutomaState>();
     List<Widget> widgets = [];
     for (int i = 0; i < 7; i++) {
       widgets.add(Padding(
@@ -171,7 +172,7 @@ class PolicyButtons extends StatelessWidget {
                     RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10.0),
                 ))),
-            onPressed: () => appState.incPolicyPriority(className, i),
+            onPressed: () => automaState.incPolicyPriority(className, i),
             child: Text(policyPriorityCards[i].number.toString()),
           )));
     }
@@ -198,7 +199,7 @@ class ActionButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final AppState appState = context.read<AppState>();
+    final AutomaState automaState = context.read<AutomaState>();
     List<Widget> widgets = [];
     for (int i = 0; i < 6; i++) {
       widgets.add(Padding(
@@ -210,7 +211,7 @@ class ActionButtons extends StatelessWidget {
                     RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10.0),
                 ))),
-            onPressed: () => appState.incActionPriority(className, i),
+            onPressed: () => automaState.incActionPriority(className, i),
             child: Text(classInfo[i].shortName),
           )));
     }
@@ -297,7 +298,7 @@ class _PriorityCardState extends State<PriorityCard> {
     const BorderRadius borderRadius = BorderRadius.all(Radius.circular(4.0));
     final Color color = widget.info.color;
     final int priority = widget.priority;
-    final AppState appState = context.read<AppState>();
+    final AutomaState automaState = context.read<AutomaState>();
 
     return Padding(
         padding: const EdgeInsets.all(4.0),
@@ -319,8 +320,8 @@ class _PriorityCardState extends State<PriorityCard> {
                   ))),
               onPressed: widget.info.number > 0
                   ? () =>
-                      appState.removePolicy(widget.className, widget.info.id)
-                  : () => appState.decActionPriority(
+                      automaState.removePolicy(widget.className, widget.info.id)
+                  : () => automaState.decActionPriority(
                       widget.className, widget.info.id),
               child: Text(widget.info.number > 0
                   ? widget.info.number.toString()

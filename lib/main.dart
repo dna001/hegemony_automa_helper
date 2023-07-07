@@ -10,15 +10,23 @@ import 'package:provider/provider.dart';
 
 import 'constants.dart';
 import 'home.dart';
-import 'data/app_state.dart';
+import 'data/automa_state.dart';
+import 'data/board_state.dart';
 
 void main() {
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
     WidgetsFlutterBinding.ensureInitialized();
     //setWindowMinSize(const Size(800, 500));
   }
-  runApp(ChangeNotifierProvider<AppState>(
-    create: (_) => AppState(),
+  runApp(MultiProvider(
+    providers: [
+      ChangeNotifierProvider<AutomaState>(
+        create: (_) => AutomaState(),
+      ),
+      ChangeNotifierProvider<BoardState>(
+        create: (_) => BoardState(),
+      ),
+    ],
     child: const App(),
   ));
 }
@@ -32,7 +40,7 @@ class App extends StatefulWidget {
 
 class _AppState extends State<App> {
   bool useMaterial3 = true;
-  ThemeMode themeMode = ThemeMode.system;
+  ThemeMode themeMode = ThemeMode.dark;
   ColorSeed colorSelected = ColorSeed.baseColor;
   ColorScheme? imageColorScheme = const ColorScheme.light();
 
@@ -51,7 +59,7 @@ class _AppState extends State<App> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-        future: context.read<AppState>().init(),
+        future: context.read<AutomaState>().init(),
         initialData: Center(child: CircularProgressIndicator()),
         builder: (context, snapshot) {
           return MaterialApp(

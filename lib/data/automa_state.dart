@@ -13,7 +13,7 @@ class PriorityState {
   PriorityState(this.id, this.priority);
 }
 
-class AppState extends ChangeNotifier {
+class AutomaState extends ChangeNotifier {
   int saveSlot = 0;
   List<PriorityState> _policyListWC = [];
   List<PriorityState> _policyListCC = [];
@@ -28,7 +28,7 @@ class AppState extends ChangeNotifier {
   List<List<PriorityState>> _undoActionListCC = [];
   List<List<PriorityState>> _undoActionListMC = [];
 
-  AppState() {
+  AutomaState() {
     _resetPolicies(ClassNames.Worker);
     _resetPolicies(ClassNames.Capitalist);
     _resetPolicies(ClassNames.Middle);

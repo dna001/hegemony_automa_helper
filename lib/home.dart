@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import 'data/app_state.dart';
+import 'data/automa_state.dart';
 import 'screens/automa_screen.dart';
 import 'screens/overview_screen.dart';
 import 'constants.dart';

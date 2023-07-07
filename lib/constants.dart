@@ -4,6 +4,8 @@
 
 import 'package:flutter/material.dart';
 
+const double largeWidthBreakpoint = 1000;
+
 enum ColorSeed {
   baseColor('M3 Baseline', Color(0xff6750a4)),
   indigo('Indigo', Colors.indigo),

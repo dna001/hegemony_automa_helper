@@ -2,6 +2,7 @@ Todo:
   - Select play mode:
    1. Automa only (board + cards + player boards needed)
    2. Board state + Automa (only cards needed)
+  - Change layout depending on screen size.
 
 Done:
  - Save on each change. Only save the diff.
