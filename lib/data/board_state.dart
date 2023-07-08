@@ -29,20 +29,24 @@ class BoardState extends ChangeNotifier {
 
   void _resetBoardState() {
     // Global variables
-    boardData["policy_fp"] = 0;
-    boardData["policy_lm"] = 0;
+    boardData["policy_fp"] = 2;
+    boardData["policy_lm"] = 1;
     boardData["policy_tx"] = 0;
-    boardData["policy_hb"] = 0;
-    boardData["policy_ed"] = 0;
-    boardData["policy_ft"] = 0;
-    boardData["policy_im"] = 0;
-    boardData["round"] = 0;
-    boardData["tax_multiplier"] = 0;
+    boardData["policy_hb"] = 1;
+    boardData["policy_ed"] = 2;
+    boardData["policy_ft"] = 1;
+    boardData["policy_im"] = 1;
+    boardData["round"] = 1;
+    boardData["tax_multiplier"] = 5;
     // Class variables
     boardData["wc_points"] = 0;
+    boardData["wc_money"] = 30;
     boardData["cc_points"] = 0;
+    boardData["cc_money"] = 120;
     boardData["mc_points"] = 0;
+    boardData["mc_money"] = 40;
     boardData["sc_points"] = 0;
+    boardData["sc_money"] = 120;
   }
 
   void setItem(String key, int value) {
@@ -52,6 +56,12 @@ class BoardState extends ChangeNotifier {
 
   int getItem(String key) {
     return boardData[key] ?? 0;
+  }
+
+  void incDecItem(String key, int value) {
+    int oldValue = boardData[key] ?? 0;
+    boardData[key] = oldValue + value;
+    notifyListeners();
   }
 
   Future<void> load({int slot = 0}) async {

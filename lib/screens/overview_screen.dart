@@ -6,7 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../data/automa_state.dart';
 import '../policy_widget.dart';
-import '../capitalist_companies_widget.dart';
+import '../cc_companies_widget.dart';
+import '../mc_companies_widget.dart';
+import '../sc_companies_widget.dart';
+import '../state_area_widget.dart';
+import '../unemployed_workers_widget.dart';
 import '../constants.dart';
 
 const rowDivider = SizedBox(width: 20);
@@ -55,7 +59,13 @@ class _OverviewScreenState extends State<OverviewScreen> {
       SliverToBoxAdapter(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16.0, 20, 16.0, 0),
-          child: CapitalistCompaniesWidget(),
+          child: CapitalistClassCompaniesWidget(),
+        ),
+      ),
+      SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16.0, 20, 16.0, 0),
+          child: MiddleClassCompaniesWidget(),
         ),
       ),
     ];
@@ -64,23 +74,17 @@ class _OverviewScreenState extends State<OverviewScreen> {
   List<Widget> _secondHalfSlivers() {
     return [
       SliverToBoxAdapter(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16.0, 20, 16.0, 0),
-          child: Text(
-            'State Area',
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-        ),
-      ),
+          child: Padding(
+              padding: const EdgeInsets.fromLTRB(16.0, 20, 16.0, 0),
+              child: StateAreaWidget())),
       SliverToBoxAdapter(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16.0, 20, 16.0, 0),
-          child: Text(
-            'Middle Class Companies',
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-        ),
-      )
+          child: Padding(
+              padding: const EdgeInsets.fromLTRB(16.0, 20, 16.0, 0),
+              child: StateClassCompaniesWidget())),
+      SliverToBoxAdapter(
+          child: Padding(
+              padding: const EdgeInsets.fromLTRB(16.0, 20, 16.0, 0),
+              child: UnemployedWorkersWidget())),
     ];
   }
 

@@ -5,7 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'data/board_state.dart';
-import 'constants.dart';
 
 const rowDivider = SizedBox(width: 20);
 const colDivider = SizedBox(height: 5);
@@ -38,7 +37,7 @@ class _CompanyWidgetState extends State<CompanyWidget> {
           });
         },
       ),
-      Text(widget.info.priceHigh.toString()),
+      Text(widget.info.priceHigh.toString() + "£"),
       Radio<int>(
         fillColor: MaterialStateColor.resolveWith((states) => Colors.yellow),
         focusColor: MaterialStateColor.resolveWith((states) => Colors.yellow),
@@ -50,7 +49,7 @@ class _CompanyWidgetState extends State<CompanyWidget> {
           });
         },
       ),
-      Text(widget.info.priceMid.toString()),
+      Text(widget.info.priceMid.toString() + "£"),
       Radio<int>(
         fillColor:
             MaterialStateColor.resolveWith((states) => Colors.blueAccent),
@@ -64,37 +63,53 @@ class _CompanyWidgetState extends State<CompanyWidget> {
           });
         },
       ),
-      Text(widget.info.priceLow.toString()),
+      Text(widget.info.priceLow.toString() + "£"),
     ]);
 
     List<Widget> workerRowWidgets = [];
     if (widget.info.skilledWorkers > 0) {
       workerRowWidgets.add(
-        Icon(Icons.person, color: widget.info.color),
+        Icon(Icons.people_alt, color: widget.info.iconColor),
       );
     }
     for (int i = 0; i < widget.info.unskilledWorkers; i++) {
       workerRowWidgets.add(
-        Icon(Icons.person, color: Colors.blueGrey),
+        Icon(Icons.people_alt, color: Colors.grey),
       );
     }
 
     return Material(
       borderRadius: BorderRadius.all(Radius.circular(10.0)),
       color: widget.info.color,
-      child: Column(
-        children: <Widget>[
-          Text(widget.info.name + " £" + widget.info.price.toString()),
-          Row(children: <Widget>[
-            Text(widget.info.production.toString()),
-            Icon(widget.info.productionIcon),
-          ]),
-          (widget.info.skilledWorkers + widget.info.unskilledWorkers > 0)
-              ? Row(children: <Widget>[...workerRowWidgets])
-              : colDivider,
-          (widget.info.priceHigh > 0) ? priceRow : colDivider,
-        ],
-      ),
+      child: Column(children: <Widget>[
+        Text(widget.info.name + " " + widget.info.price.toString() + "£"),
+        Row(children: <Widget>[
+          Text(widget.info.production.toString()),
+          Icon(widget.info.productionIcon),
+          rowDivider,
+          (widget.info.productionExtra > 0)
+              ? Icon(Icons.settings)
+              : SizedBox(width: 1),
+          (widget.info.productionExtra > 0)
+              ? Text(": +" + widget.info.productionExtra.toString())
+              : SizedBox(width: 1),
+          (widget.info.productionExtra > 0)
+              ? Icon(widget.info.productionIcon)
+              : SizedBox(width: 1),
+        ]),
+        Padding(
+            padding: const EdgeInsets.fromLTRB(4, 4, 4, 4),
+            child: Material(
+                borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                color: Colors.black.withOpacity(0.4),
+                child: Column(children: <Widget>[
+                  (widget.info.skilledWorkers + widget.info.unskilledWorkers >
+                          0)
+                      ? Row(children: <Widget>[...workerRowWidgets])
+                      : colDivider,
+                  (widget.info.priceHigh > 0) ? priceRow : colDivider,
+                ]))),
+      ]),
     );
   }
 }
@@ -108,11 +123,14 @@ class CompanyInfo {
       this.production,
       this.productionExtra,
       this.productionIcon,
+      this.iconColor,
       this.priceHigh,
       this.priceMid,
       this.priceLow,
       this.skilledWorkers,
-      this.unskilledWorkers);
+      this.unskilledWorkers,
+      this.mcSkilledWorkers,
+      this.mcUnskilledWorkers);
   final int id;
   final String name;
   final Color color;
@@ -120,9 +138,12 @@ class CompanyInfo {
   final int production;
   final int productionExtra;
   final IconData productionIcon;
+  final Color iconColor;
   final int priceHigh;
   final int priceMid;
   final int priceLow;
   final int skilledWorkers;
   final int unskilledWorkers;
+  final int mcSkilledWorkers;
+  final int mcUnskilledWorkers;
 }

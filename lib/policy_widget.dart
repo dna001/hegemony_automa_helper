@@ -5,7 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../data/board_state.dart';
-import '../constants.dart';
 
 const rowDivider = SizedBox(width: 70);
 const colDivider = SizedBox(height: 5);
@@ -58,14 +57,7 @@ class _PolicyRowState extends State<PolicyRow> {
   Widget build(BuildContext context) {
     BoardState boardState = context.watch<BoardState>();
     const BorderRadius borderRadius = BorderRadius.all(Radius.circular(4.0));
-    final Color color = widget.info.color;
-    String stateString = 'A';
-    int policyState = boardState.getItem(widget.info.key);
-    if (policyState == 1) {
-      stateString = 'B';
-    } else if (policyState == 2) {
-      stateString = 'C';
-    }
+    _selectedSlot = boardState.getItem(widget.info.key);
 
     return Material(
       borderRadius: borderRadius,
