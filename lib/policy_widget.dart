@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../data/board_state.dart';
 
-const rowDivider = SizedBox(width: 70);
+const rowDivider = SizedBox(width: 60);
 const colDivider = SizedBox(height: 5);
 const double widthConstraint = 450;
 
@@ -75,9 +75,7 @@ class _PolicyRowState extends State<PolicyRow> {
             value: 0,
             groupValue: _selectedSlot,
             onChanged: (value) {
-              setState(() {
-                _selectedSlot = value;
-              });
+              boardState.setItem(widget.info.key, value ?? 0);
             },
           ),
           rowDivider,
@@ -89,9 +87,7 @@ class _PolicyRowState extends State<PolicyRow> {
             value: 1,
             groupValue: _selectedSlot,
             onChanged: (value) {
-              setState(() {
-                _selectedSlot = value;
-              });
+              boardState.setItem(widget.info.key, value ?? 0);
             },
           ),
           rowDivider,
@@ -103,9 +99,7 @@ class _PolicyRowState extends State<PolicyRow> {
             value: 2,
             groupValue: _selectedSlot,
             onChanged: (value) {
-              setState(() {
-                _selectedSlot = value;
-              });
+              boardState.setItem(widget.info.key, value ?? 0);
             },
           ),
         ]),

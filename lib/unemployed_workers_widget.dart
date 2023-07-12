@@ -47,7 +47,7 @@ class UnemployedWorkerRow extends StatelessWidget {
   Widget build(BuildContext context) {
     BoardState boardState = context.watch<BoardState>();
 
-    return Row(children: <Widget>[
+    return Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
       WorkerAdjustWidget(
           workerKey: bsKey + "_skilled_health",
           icon: icon,

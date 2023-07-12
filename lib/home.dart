@@ -3,12 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:sidebarx/sidebarx.dart';
 
 import 'data/automa_state.dart';
 import 'screens/automa_screen.dart';
 import 'screens/overview_screen.dart';
+import 'screens/settings_screen.dart';
 import 'constants.dart';
-import 'navigationbar.dart';
+import 'sidenavigationbar.dart';
 
 class Home extends StatefulWidget {
   const Home({
@@ -27,8 +29,9 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
-  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   int screenIndex = ScreenSelected.overview.value;
+  final _controller = SidebarXController(selectedIndex: 0, extended: true);
 
   @override
   initState() {
@@ -51,16 +54,20 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     });
   }
 
-  Widget createScreenFor(ScreenSelected screenSelected) {
+  Widget createScreenFor(int screenSelected) {
     switch (screenSelected) {
-      case ScreenSelected.overview:
+      case 0:
         return const OverviewScreen();
-      case ScreenSelected.workerClass:
+      case 1:
         return const AutomaScreen(className: ClassNames.Worker);
-      case ScreenSelected.capitalistClass:
+      case 2:
         return const AutomaScreen(className: ClassNames.Capitalist);
-      case ScreenSelected.middleClass:
+      case 3:
         return const AutomaScreen(className: ClassNames.Middle);
+      case 4:
+        return const SettingsScreen();
+      default:
+        return const Text("Out of screens");
     }
   }
 
@@ -73,7 +80,45 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Builder(
+      builder: (context) {
+        final isSmallScreen = MediaQuery.of(context).size.width < 500;
+        return Scaffold(
+          key: _scaffoldKey,
+          appBar: isSmallScreen
+              ? AppBar(
+                  backgroundColor: Colors.black,
+                  title: Text(sideNavbarGetTitleByIndex(screenIndex)),
+                  leading: IconButton(
+                    onPressed: () {
+                      // if (!Platform.isAndroid && !Platform.isIOS) {
+                      //   _controller.setExtended(true);
+                      // }
+                      _scaffoldKey.currentState?.openDrawer();
+                    },
+                    icon: const Icon(Icons.menu),
+                  ),
+                )
+              : null,
+          drawer: SideNavbarX(
+              controller: _controller, onSelectItem: handleScreenChanged),
+          body: Row(
+            children: [
+              if (!isSmallScreen)
+                SideNavbarX(
+                    controller: _controller, onSelectItem: handleScreenChanged),
+              Expanded(
+                child: Center(
+                  child: createScreenFor(screenIndex),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    /*Scaffold(
         key: scaffoldKey,
         appBar: createAppBar(),
         body: Row(
@@ -89,6 +134,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             });
           },
           selectedIndex: screenIndex,
-        ));
+        ));*/
   }
 }

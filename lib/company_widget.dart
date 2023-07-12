@@ -24,7 +24,8 @@ class _CompanyWidgetState extends State<CompanyWidget> {
   Widget build(BuildContext context) {
     final BoardState boardState = context.watch<BoardState>();
 
-    Widget priceRow = Row(children: <Widget>[
+    Widget priceRow =
+        Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
       Radio<int>(
         fillColor: MaterialStateColor.resolveWith((states) => Colors.redAccent),
         focusColor:
@@ -71,11 +72,23 @@ class _CompanyWidgetState extends State<CompanyWidget> {
       workerRowWidgets.add(
         Icon(Icons.people_alt, color: widget.info.iconColor),
       );
+      for (int i = 0; i < widget.info.unskilledWorkers; i++) {
+        workerRowWidgets.add(
+          Icon(Icons.people_alt, color: Colors.grey),
+        );
+      }
     }
-    for (int i = 0; i < widget.info.unskilledWorkers; i++) {
-      workerRowWidgets.add(
-        Icon(Icons.people_alt, color: Colors.grey),
-      );
+    if (widget.info.mcSkilledWorkers > 0) {
+      for (int i = 0; i < widget.info.mcSkilledWorkers; i++) {
+        workerRowWidgets.add(
+          Icon(Icons.engineering, color: widget.info.iconColor),
+        );
+      }
+      for (int i = 0; i < widget.info.unskilledWorkers; i++) {
+        workerRowWidgets.add(
+          Icon(Icons.person, color: Colors.grey),
+        );
+      }
     }
 
     return Material(
@@ -83,29 +96,38 @@ class _CompanyWidgetState extends State<CompanyWidget> {
       color: widget.info.color,
       child: Column(children: <Widget>[
         Text(widget.info.name + " " + widget.info.price.toString() + "£"),
-        Row(children: <Widget>[
-          Text(widget.info.production.toString()),
-          Icon(widget.info.productionIcon),
-          rowDivider,
-          (widget.info.productionExtra > 0)
-              ? Icon(Icons.settings)
-              : SizedBox(width: 1),
-          (widget.info.productionExtra > 0)
-              ? Text(": +" + widget.info.productionExtra.toString())
-              : SizedBox(width: 1),
-          (widget.info.productionExtra > 0)
-              ? Icon(widget.info.productionIcon)
-              : SizedBox(width: 1),
-        ]),
         Padding(
             padding: const EdgeInsets.fromLTRB(4, 4, 4, 4),
             child: Material(
                 borderRadius: BorderRadius.all(Radius.circular(10.0)),
                 color: Colors.black.withOpacity(0.4),
                 child: Column(children: <Widget>[
+                  Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Text(widget.info.production.toString()),
+                        Icon(widget.info.productionIcon,
+                            color: widget.info.color),
+                        rowDivider,
+                        (widget.info.productionExtra > 0)
+                            ? (widget.info.mcSkilledWorkers > 0)
+                                ? Icon(Icons.person, color: Colors.grey)
+                                : Icon(Icons.settings)
+                            : SizedBox(width: 1),
+                        (widget.info.productionExtra > 0)
+                            ? Text(
+                                ": +" + widget.info.productionExtra.toString())
+                            : SizedBox(width: 1),
+                        (widget.info.productionExtra > 0)
+                            ? Icon(widget.info.productionIcon,
+                                color: widget.info.color)
+                            : SizedBox(width: 1),
+                      ]),
                   (widget.info.skilledWorkers + widget.info.unskilledWorkers >
                           0)
-                      ? Row(children: <Widget>[...workerRowWidgets])
+                      ? Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[...workerRowWidgets])
                       : colDivider,
                   (widget.info.priceHigh > 0) ? priceRow : colDivider,
                 ]))),

@@ -11,6 +11,7 @@ import '../mc_companies_widget.dart';
 import '../sc_companies_widget.dart';
 import '../state_area_widget.dart';
 import '../unemployed_workers_widget.dart';
+import '../victory_point_widget.dart';
 import '../constants.dart';
 
 const rowDivider = SizedBox(width: 20);
@@ -18,7 +19,7 @@ const colDivider = SizedBox(height: 10);
 const tinySpacing = 3.0;
 const smallSpacing = 10.0;
 const double cardWidth = 115;
-const double widthConstraint = 450;
+const double widthConstraint = 410;
 
 class OverviewScreen extends StatefulWidget {
   const OverviewScreen({super.key});
@@ -47,12 +48,6 @@ class _OverviewScreenState extends State<OverviewScreen> {
       SliverToBoxAdapter(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16.0, 20, 16.0, 0),
-          child: SaveSlotButtons(),
-        ),
-      ),
-      SliverToBoxAdapter(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16.0, 20, 16.0, 0),
           child: PolicyWidget(),
         ),
       ),
@@ -73,6 +68,10 @@ class _OverviewScreenState extends State<OverviewScreen> {
 
   List<Widget> _secondHalfSlivers() {
     return [
+      SliverToBoxAdapter(
+          child: Padding(
+              padding: const EdgeInsets.fromLTRB(16.0, 20, 16.0, 0),
+              child: VictoryPointsWidget())),
       SliverToBoxAdapter(
           child: Padding(
               padding: const EdgeInsets.fromLTRB(16.0, 20, 16.0, 0),
@@ -97,78 +96,20 @@ class _OverviewScreenState extends State<OverviewScreen> {
             width: 1000,
             child: Row(children: [
               SizedBox(
-                  width: 450,
+                  width: widthConstraint,
                   child: CustomScrollView(
                     slivers: [..._firstHalfSlivers()],
                   )),
               SizedBox(
-                  width: 450,
+                  width: widthConstraint,
                   child: CustomScrollView(
                     slivers: [..._secondHalfSlivers()],
                   )),
             ]),
           )
         : SizedBox(
-            width: 450,
+            width: widthConstraint,
             child: CustomScrollView(
                 slivers: [..._firstHalfSlivers(), ..._secondHalfSlivers()]));
-  }
-}
-
-class SaveSlotButtons extends StatefulWidget {
-  const SaveSlotButtons({super.key});
-
-  @override
-  State<SaveSlotButtons> createState() => _SaveSlotButtonsState();
-}
-
-class _SaveSlotButtonsState extends State<SaveSlotButtons> {
-  int? _selectedSlot = 0;
-
-  @override
-  Widget build(BuildContext context) {
-    final AutomaState automaState = context.watch<AutomaState>();
-    final List<Widget> widgets = <Widget>[];
-    _selectedSlot = automaState.saveSlot;
-    for (int i = 0; i < 5; i++) {
-      widgets.add(
-          /*ListTile(
-        title: Text(i.toString()),
-        leading: */
-          Radio<int>(
-        fillColor: MaterialStateColor.resolveWith((states) => Colors.white),
-        focusColor: MaterialStateColor.resolveWith((states) => Colors.white),
-        value: i,
-        groupValue: _selectedSlot,
-        onChanged: (value) {
-          automaState.setSaveSlot(value ?? 0);
-        },
-        //),
-      ));
-    }
-
-    return Material(
-      borderRadius: BorderRadius.all(Radius.circular(10.0)),
-      color: Colors.blueGrey,
-      child: Row(
-        children: <Widget>[
-          rowDivider,
-          Text(
-            "Save Slot",
-            style: Theme.of(context)
-                .textTheme
-                .headlineSmall!
-                .copyWith(color: Colors.white),
-          ),
-          rowDivider,
-          ...widgets,
-          rowDivider,
-          FilledButton(
-            onPressed: () => automaState.clear(),
-            child: Text('Clear'),
-          ),
-        ],
-      ),
-    );
   }
 }

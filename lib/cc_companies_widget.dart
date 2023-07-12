@@ -29,17 +29,14 @@ class CapitalistClassCompaniesWidget extends StatelessWidget {
                       .titleMedium!
                       .copyWith(color: Colors.orange)),
               colDivider,
-              Row(children: [
-                CompanyWidget(info: capitalistClassCompanyCards[0]),
-                rowDivider,
-                CompanyWidget(info: capitalistClassCompanyCards[1]),
-              ]),
-              colDivider,
-              Row(children: [
-                CompanyWidget(info: capitalistClassCompanyCards[2]),
-                rowDivider,
-                CompanyWidget(info: capitalistClassCompanyCards[3]),
-              ]),
+              SizedBox(
+                  height: 200,
+                  child: ListView.builder(
+                    itemCount: 4,
+                    scrollDirection: Axis.vertical,
+                    itemBuilder: (context, index) => CompanyWidget(
+                        info: capitalistClassCompanyCards[index % 4]),
+                  ))
             ])));
   }
 }

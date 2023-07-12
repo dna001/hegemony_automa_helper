@@ -45,30 +45,30 @@ class StateTreasurey extends StatelessWidget {
                       .titleMedium!
                       .copyWith(color: Colors.orange)),
               colDivider,
-              Row(children: <Widget>[
-                rowDivider,
-                FilledButton(
-                    onPressed: () => boardState.incDecItem("sc_money", -10),
-                    child: Text('-10£')),
-                rowDivider,
-                FilledButton(
-                    onPressed: () => boardState.incDecItem("sc_money", -1),
-                    child: Text('-1£')),
-                rowDivider,
-                Text(boardState.getItem("sc_money").toString() + "£",
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium!
-                        .copyWith(color: Colors.orange)),
-                rowDivider,
-                FilledButton(
-                    onPressed: () => boardState.incDecItem("sc_money", 1),
-                    child: Text('+1£')),
-                rowDivider,
-                FilledButton(
-                    onPressed: () => boardState.incDecItem("sc_money", 10),
-                    child: Text('+10£')),
-              ])
+              Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    IconButton(
+                        icon: Icon(Icons.remove, size: 40),
+                        onPressed: () =>
+                            boardState.incDecItem("sc_money", -10)),
+                    IconButton(
+                        icon: Icon(Icons.remove),
+                        onPressed: () => boardState.incDecItem("sc_money", -1)),
+                    rowDivider,
+                    Text(boardState.getItem("sc_money").toString() + "£",
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium!
+                            .copyWith(color: Colors.orange)),
+                    rowDivider,
+                    IconButton(
+                        icon: Icon(Icons.add),
+                        onPressed: () => boardState.incDecItem("sc_money", 1)),
+                    IconButton(
+                        icon: Icon(Icons.add, size: 40),
+                        onPressed: () => boardState.incDecItem("sc_money", 10)),
+                  ])
             ])));
   }
 }
@@ -78,6 +78,8 @@ class PublicServices extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    BoardState boardState = context.watch<BoardState>();
+
     return Material(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
@@ -93,22 +95,29 @@ class PublicServices extends StatelessWidget {
                       .titleMedium!
                       .copyWith(color: Colors.orange)),
               colDivider,
-              Row(children: <Widget>[
-                PublicService(
-                    bsKey: "sc_health",
-                    icon: Icons.heart_broken,
-                    iconColor: Colors.red),
-                VerticalDividerCustom(),
-                PublicService(
-                    bsKey: "sc_education",
-                    icon: Icons.school,
-                    iconColor: Colors.orange),
-                VerticalDividerCustom(),
-                PublicService(
-                    bsKey: "sc_media",
-                    icon: Icons.chat_bubble,
-                    iconColor: Colors.purple),
-              ])
+              Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    PublicService(
+                        bsKey: "sc_health",
+                        icon: Icons.heart_broken,
+                        iconColor: Colors.red,
+                        price: _getWelfareStatePrice(
+                            boardState.getItem("policy_hb"))),
+                    VerticalDividerCustom(),
+                    PublicService(
+                        bsKey: "sc_education",
+                        icon: Icons.school,
+                        iconColor: Colors.orange,
+                        price: _getWelfareStatePrice(
+                            boardState.getItem("policy_ed"))),
+                    VerticalDividerCustom(),
+                    PublicService(
+                        bsKey: "sc_media",
+                        icon: Icons.chat_bubble,
+                        iconColor: Colors.purple,
+                        price: 10),
+                  ])
             ])));
   }
 }
@@ -118,10 +127,12 @@ class PublicService extends StatelessWidget {
       {super.key,
       required this.bsKey,
       required this.icon,
-      required this.iconColor});
+      required this.iconColor,
+      required this.price});
   final String bsKey;
   final IconData icon;
   final Color iconColor;
+  final int price;
 
   @override
   Widget build(BuildContext context) {
@@ -130,8 +141,7 @@ class PublicService extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
       child: Column(children: <Widget>[
-        SizedBox(width: 90),
-        Text(boardState.getItem(bsKey + "_price").toString() + "£",
+        Text(price.toString() + "£",
             style: Theme.of(context)
                 .textTheme
                 .titleMedium!
@@ -162,5 +172,18 @@ class VerticalDividerCustom extends StatelessWidget {
       color: Colors.orange,
       margin: const EdgeInsets.only(left: 10.0, right: 10.0),
     );
+  }
+}
+
+int _getWelfareStatePrice(int index) {
+  switch (index) {
+    case 0:
+      return 0;
+    case 1:
+      return 5;
+    case 2:
+      return 10;
+    default:
+      return 0;
   }
 }
