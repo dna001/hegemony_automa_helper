@@ -5,7 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../data/automa_state.dart';
-import '../constants.dart';
 
 const rowDivider = SizedBox(width: 20);
 const colDivider = SizedBox(height: 10);
@@ -23,18 +22,6 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   bool showLargeSizeLayout = false;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-
-    final double width = MediaQuery.of(context).size.width;
-    if (width > largeWidthBreakpoint) {
-      showLargeSizeLayout = true;
-    } else {
-      showLargeSizeLayout = false;
-    }
-  }
 
   @override
   Widget build(BuildContext context) {

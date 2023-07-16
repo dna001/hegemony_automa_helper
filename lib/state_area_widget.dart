@@ -51,12 +51,13 @@ class StateTreasurey extends StatelessWidget {
                     IconButton(
                         icon: Icon(Icons.remove, size: 40),
                         onPressed: () =>
-                            boardState.incDecItem("sc_money", -10)),
+                            boardState.incDecItem("sc_treasury", -10)),
                     IconButton(
                         icon: Icon(Icons.remove),
-                        onPressed: () => boardState.incDecItem("sc_money", -1)),
+                        onPressed: () =>
+                            boardState.incDecItem("sc_treasury", -1)),
                     rowDivider,
-                    Text(boardState.getItem("sc_money").toString() + "£",
+                    Text(boardState.getItem("sc_treasury").toString() + "£",
                         style: Theme.of(context)
                             .textTheme
                             .titleMedium!
@@ -64,10 +65,12 @@ class StateTreasurey extends StatelessWidget {
                     rowDivider,
                     IconButton(
                         icon: Icon(Icons.add),
-                        onPressed: () => boardState.incDecItem("sc_money", 1)),
+                        onPressed: () =>
+                            boardState.incDecItem("sc_treasury", 1)),
                     IconButton(
                         icon: Icon(Icons.add, size: 40),
-                        onPressed: () => boardState.incDecItem("sc_money", 10)),
+                        onPressed: () =>
+                            boardState.incDecItem("sc_treasury", 10)),
                   ])
             ])));
   }
@@ -99,21 +102,21 @@ class PublicServices extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: <Widget>[
                     PublicService(
-                        bsKey: "sc_health",
+                        bsKey: "sc_storage_health",
                         icon: Icons.heart_broken,
                         iconColor: Colors.red,
                         price: _getWelfareStatePrice(
                             boardState.getItem("policy_hb"))),
                     VerticalDividerCustom(),
                     PublicService(
-                        bsKey: "sc_education",
+                        bsKey: "sc_storage_education",
                         icon: Icons.school,
                         iconColor: Colors.orange,
                         price: _getWelfareStatePrice(
                             boardState.getItem("policy_ed"))),
                     VerticalDividerCustom(),
                     PublicService(
-                        bsKey: "sc_media",
+                        bsKey: "sc_storage_media",
                         icon: Icons.chat_bubble,
                         iconColor: Colors.purple,
                         price: 10),

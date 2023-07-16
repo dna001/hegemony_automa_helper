@@ -10,8 +10,15 @@ const rowDivider = SizedBox(width: 20);
 const colDivider = SizedBox(height: 5);
 
 class CompanyWidget extends StatefulWidget {
-  CompanyWidget({required this.info});
+  CompanyWidget(
+      {required this.info,
+      this.mode = CompanyViewMode.small,
+      this.onAdd,
+      required this.bsKeyBase});
   final CompanyInfo info;
+  final CompanyViewMode mode;
+  final VoidCallback? onAdd;
+  final String bsKeyBase;
 
   @override
   State<CompanyWidget> createState() => _CompanyWidgetState();
@@ -23,49 +30,90 @@ class _CompanyWidgetState extends State<CompanyWidget> {
   @override
   Widget build(BuildContext context) {
     final BoardState boardState = context.watch<BoardState>();
+    Widget priceRow = SizedBox(width: 1);
 
-    Widget priceRow =
-        Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
-      Radio<int>(
-        fillColor: MaterialStateColor.resolveWith((states) => Colors.redAccent),
-        focusColor:
-            MaterialStateColor.resolveWith((states) => Colors.redAccent),
-        value: 0,
-        groupValue: _priceSlot,
-        onChanged: (value) {
-          setState(() {
-            _priceSlot = value;
-          });
-        },
-      ),
-      Text(widget.info.priceHigh.toString() + "£"),
-      Radio<int>(
-        fillColor: MaterialStateColor.resolveWith((states) => Colors.yellow),
-        focusColor: MaterialStateColor.resolveWith((states) => Colors.yellow),
-        value: 1,
-        groupValue: _priceSlot,
-        onChanged: (value) {
-          setState(() {
-            _priceSlot = value;
-          });
-        },
-      ),
-      Text(widget.info.priceMid.toString() + "£"),
-      Radio<int>(
-        fillColor:
-            MaterialStateColor.resolveWith((states) => Colors.blueAccent),
-        focusColor:
-            MaterialStateColor.resolveWith((states) => Colors.blueAccent),
-        value: 2,
-        groupValue: _priceSlot,
-        onChanged: (value) {
-          setState(() {
-            _priceSlot = value;
-          });
-        },
-      ),
-      Text(widget.info.priceLow.toString() + "£"),
-    ]);
+    if (widget.mode == CompanyViewMode.edit) {
+      priceRow =
+          Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
+        Radio<int>(
+          fillColor:
+              MaterialStateColor.resolveWith((states) => Colors.redAccent),
+          focusColor:
+              MaterialStateColor.resolveWith((states) => Colors.redAccent),
+          value: 0,
+          groupValue: _priceSlot,
+          onChanged: (value) {
+            setState(() {
+              _priceSlot = value;
+            });
+          },
+        ),
+        Text(widget.info.priceHigh.toString() + "£"),
+        Radio<int>(
+          fillColor: MaterialStateColor.resolveWith((states) => Colors.yellow),
+          focusColor: MaterialStateColor.resolveWith((states) => Colors.yellow),
+          value: 1,
+          groupValue: _priceSlot,
+          onChanged: (value) {
+            setState(() {
+              _priceSlot = value;
+            });
+          },
+        ),
+        Text(widget.info.priceMid.toString() + "£"),
+        Radio<int>(
+          fillColor:
+              MaterialStateColor.resolveWith((states) => Colors.blueAccent),
+          focusColor:
+              MaterialStateColor.resolveWith((states) => Colors.blueAccent),
+          value: 2,
+          groupValue: _priceSlot,
+          onChanged: (value) {
+            setState(() {
+              _priceSlot = value;
+            });
+          },
+        ),
+        Text(widget.info.priceLow.toString() + "£"),
+      ]);
+    } else if (widget.mode == CompanyViewMode.small) {
+      int priceSlot = boardState.getItem(widget.bsKeyBase + "_price");
+      Color color = (priceSlot == 0)
+          ? Colors.red
+          : (priceSlot == 1)
+              ? Colors.orange
+              : Colors.blue;
+      int price = (priceSlot == 0)
+          ? widget.info.priceHigh
+          : (priceSlot == 1)
+              ? widget.info.priceMid
+              : widget.info.priceLow;
+      priceRow = Padding(
+          padding: EdgeInsets.fromLTRB(0, 0, 0, 4),
+          child: Container(
+            //width: 40,
+            //padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              shape: BoxShape.rectangle,
+              color: color,
+            ),
+            child: TextButton(
+              child: Text(price.toString() + "£",
+                  style: TextStyle(
+                      color: Colors.white,
+                      //fontWeight: FontWeight.bold,
+                      fontSize: 12)),
+              onPressed: () => {
+                if (boardState.getItem(widget.bsKeyBase + "_price") == 0)
+                  {boardState.setItem(widget.bsKeyBase + "_price", 2)}
+                else if (boardState.getItem(widget.bsKeyBase + "_price") == 1)
+                  {boardState.setItem(widget.bsKeyBase + "_price", 0)}
+                else
+                  {boardState.setItem(widget.bsKeyBase + "_price", 1)}
+              },
+            ),
+          ));
+    }
 
     List<Widget> workerRowWidgets = [];
     if (widget.info.skilledWorkers > 0) {
@@ -131,41 +179,17 @@ class _CompanyWidgetState extends State<CompanyWidget> {
                       : colDivider,
                   (widget.info.priceHigh > 0) ? priceRow : colDivider,
                 ]))),
+        (widget.mode == CompanyViewMode.select)
+            ? IconButton(
+                icon: Icon(Icons.add_business), onPressed: widget.onAdd)
+            : SizedBox(width: 1),
       ]),
     );
   }
 }
 
-class CompanyInfo {
-  const CompanyInfo(
-      this.id,
-      this.name,
-      this.color,
-      this.price,
-      this.production,
-      this.productionExtra,
-      this.productionIcon,
-      this.iconColor,
-      this.priceHigh,
-      this.priceMid,
-      this.priceLow,
-      this.skilledWorkers,
-      this.unskilledWorkers,
-      this.mcSkilledWorkers,
-      this.mcUnskilledWorkers);
-  final int id;
-  final String name;
-  final Color color;
-  final int price;
-  final int production;
-  final int productionExtra;
-  final IconData productionIcon;
-  final Color iconColor;
-  final int priceHigh;
-  final int priceMid;
-  final int priceLow;
-  final int skilledWorkers;
-  final int unskilledWorkers;
-  final int mcSkilledWorkers;
-  final int mcUnskilledWorkers;
+enum CompanyViewMode {
+  small,
+  edit,
+  select,
 }

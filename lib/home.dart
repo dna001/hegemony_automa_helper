@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:sidebarx/sidebarx.dart';
 
-import 'data/automa_state.dart';
+import '../data/board_state.dart';
 import 'screens/automa_screen.dart';
 import 'screens/overview_screen.dart';
 import 'screens/settings_screen.dart';
@@ -59,11 +59,11 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       case 0:
         return const OverviewScreen();
       case 1:
-        return const AutomaScreen(className: ClassNames.Worker);
+        return const AutomaScreen(className: ClassName.Worker);
       case 2:
-        return const AutomaScreen(className: ClassNames.Capitalist);
+        return const AutomaScreen(className: ClassName.Capitalist);
       case 3:
-        return const AutomaScreen(className: ClassNames.Middle);
+        return const AutomaScreen(className: ClassName.Middle);
       case 4:
         return const SettingsScreen();
       default:

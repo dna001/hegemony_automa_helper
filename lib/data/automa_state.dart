@@ -4,8 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-enum ClassNames { Worker, Capitalist, Middle }
+import 'board_state.dart';
 
 class PriorityState {
   final int id;
@@ -29,21 +28,21 @@ class AutomaState extends ChangeNotifier {
   List<List<PriorityState>> _undoActionListMC = [];
 
   AutomaState() {
-    _resetPolicies(ClassNames.Worker);
-    _resetPolicies(ClassNames.Capitalist);
-    _resetPolicies(ClassNames.Middle);
-    _resetActions(ClassNames.Worker);
-    _resetActions(ClassNames.Capitalist);
-    _resetActions(ClassNames.Middle);
+    _resetPolicies(ClassName.Worker);
+    _resetPolicies(ClassName.Capitalist);
+    _resetPolicies(ClassName.Middle);
+    _resetActions(ClassName.Worker);
+    _resetActions(ClassName.Capitalist);
+    _resetActions(ClassName.Middle);
   }
 
   Future<void> init() async {
     await setSaveSlot(0);
   }
 
-  void _resetPolicies(ClassNames className) {
+  void _resetPolicies(ClassName className) {
     switch (className) {
-      case ClassNames.Worker:
+      case ClassName.Worker:
         _policyListWC = [
           PriorityState(0, 1),
           PriorityState(4, 1),
@@ -54,7 +53,7 @@ class AutomaState extends ChangeNotifier {
           PriorityState(6, -1)
         ];
         break;
-      case ClassNames.Capitalist:
+      case ClassName.Capitalist:
         _policyListCC = [
           PriorityState(2, 1),
           PriorityState(1, 0),
@@ -65,7 +64,7 @@ class AutomaState extends ChangeNotifier {
           PriorityState(4, -1)
         ];
         break;
-      case ClassNames.Middle:
+      case ClassName.Middle:
         _policyListMC = [
           PriorityState(0, 0),
           PriorityState(2, 0),
@@ -76,12 +75,14 @@ class AutomaState extends ChangeNotifier {
           PriorityState(5, -1)
         ];
         break;
+      default:
+        break;
     }
   }
 
-  void _resetActions(ClassNames className) {
+  void _resetActions(ClassName className) {
     switch (className) {
-      case ClassNames.Worker:
+      case ClassName.Worker:
         _actionListWC = [
           PriorityState(0, 1),
           PriorityState(1, 1),
@@ -91,7 +92,7 @@ class AutomaState extends ChangeNotifier {
           PriorityState(5, 0)
         ];
         break;
-      case ClassNames.Capitalist:
+      case ClassName.Capitalist:
         _actionListCC = [
           PriorityState(0, 1),
           PriorityState(1, 1),
@@ -101,7 +102,7 @@ class AutomaState extends ChangeNotifier {
           PriorityState(5, 0)
         ];
         break;
-      case ClassNames.Middle:
+      case ClassName.Middle:
         _actionListMC = [
           PriorityState(0, 1),
           PriorityState(1, 1),
@@ -111,28 +112,34 @@ class AutomaState extends ChangeNotifier {
           PriorityState(5, 0)
         ];
         break;
+      default:
+        break;
     }
   }
 
-  List<PriorityState> getPolicyList(ClassNames className) {
+  List<PriorityState> getPolicyList(ClassName className) {
     switch (className) {
-      case ClassNames.Worker:
+      case ClassName.Worker:
         return _policyListWC;
-      case ClassNames.Capitalist:
+      case ClassName.Capitalist:
         return _policyListCC;
-      case ClassNames.Middle:
+      case ClassName.Middle:
         return _policyListMC;
+      default:
+        return [];
     }
   }
 
-  List<PriorityState> getActionList(ClassNames className) {
+  List<PriorityState> getActionList(ClassName className) {
     switch (className) {
-      case ClassNames.Worker:
+      case ClassName.Worker:
         return _actionListWC;
-      case ClassNames.Capitalist:
+      case ClassName.Capitalist:
         return _actionListCC;
-      case ClassNames.Middle:
+      case ClassName.Middle:
         return _actionListMC;
+      default:
+        return [];
     }
   }
 
@@ -236,26 +243,26 @@ class AutomaState extends ChangeNotifier {
     }
   }
 
-  Future<void> save(ClassNames cls,
+  Future<void> save(ClassName cls,
       {List<PriorityState>? undoPolicyPriorityList,
       List<PriorityState>? undoActionPriorityList}) async {
     final prefs = await SharedPreferences.getInstance();
     // Check if slot is used
-    if (cls == ClassNames.Worker) {
+    if (cls == ClassName.Worker) {
       String testKey = saveSlot.toString() + "_policy_wc_order_0";
       bool slotUsed = prefs.containsKey(testKey);
       _savePriorities(prefs, undoPolicyPriorityList ?? _undoPolicyListWC.last,
           _policyListWC, "policy_wc", saveSlot, !slotUsed);
       _savePriorities(prefs, undoActionPriorityList ?? _undoActionListWC.last,
           _actionListWC, "action_wc", saveSlot, !slotUsed);
-    } else if (cls == ClassNames.Capitalist) {
+    } else if (cls == ClassName.Capitalist) {
       String testKey = saveSlot.toString() + "_policy_cc_order_0";
       bool slotUsed = prefs.containsKey(testKey);
       _savePriorities(prefs, undoPolicyPriorityList ?? _undoPolicyListCC.last,
           _policyListCC, "policy_cc", saveSlot, !slotUsed);
       _savePriorities(prefs, undoActionPriorityList ?? _undoActionListCC.last,
           _actionListCC, "action_cc", saveSlot, !slotUsed);
-    } else if (cls == ClassNames.Middle) {
+    } else if (cls == ClassName.Middle) {
       String testKey = saveSlot.toString() + "_policy_mc_order_0";
       bool slotUsed = prefs.containsKey(testKey);
       _savePriorities(prefs, undoPolicyPriorityList ?? _undoPolicyListMC.last,
@@ -270,7 +277,7 @@ class AutomaState extends ChangeNotifier {
     await prefs.clear();
   }
 
-  Future<void> incPolicyPriority(ClassNames cls, int id) async {
+  Future<void> incPolicyPriority(ClassName cls, int id) async {
     _storeUndoInfo(cls);
     List<PriorityState> policyList = getPolicyList(cls);
     for (PriorityState state in policyList) {
@@ -284,7 +291,7 @@ class AutomaState extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> removePolicy(ClassNames cls, int id) async {
+  Future<void> removePolicy(ClassName cls, int id) async {
     _storeUndoInfo(cls);
     List<PriorityState> policyList = getPolicyList(cls);
     for (PriorityState state in policyList) {
@@ -298,7 +305,7 @@ class AutomaState extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> incActionPriority(ClassNames cls, int id) async {
+  Future<void> incActionPriority(ClassName cls, int id) async {
     _storeUndoInfo(cls);
     List<PriorityState> actionList = getActionList(cls);
     for (PriorityState state in actionList) {
@@ -312,7 +319,7 @@ class AutomaState extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> decActionPriority(ClassNames cls, int id) async {
+  Future<void> decActionPriority(ClassName cls, int id) async {
     _storeUndoInfo(cls);
     List<PriorityState> actionList = getActionList(cls);
     PriorityState foundState = PriorityState(0, 0);
@@ -334,7 +341,7 @@ class AutomaState extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> resetPriorities(ClassNames cls) async {
+  Future<void> resetPriorities(ClassName cls) async {
     _storeUndoInfo(cls);
     _resetPolicies(cls);
     _resetActions(cls);
@@ -365,7 +372,7 @@ class AutomaState extends ChangeNotifier {
     }
   }
 
-  Future<void> flattenPriorities(ClassNames cls) async {
+  Future<void> flattenPriorities(ClassName cls) async {
     _storeUndoInfo(cls);
     _flattenPrioritiesHelper(getPolicyList(cls));
     _flattenPrioritiesHelper(getActionList(cls));
@@ -373,25 +380,29 @@ class AutomaState extends ChangeNotifier {
     notifyListeners();
   }
 
-  List<List<PriorityState>> _getUndoPolicyList(ClassNames className) {
+  List<List<PriorityState>> _getUndoPolicyList(ClassName className) {
     switch (className) {
-      case ClassNames.Worker:
+      case ClassName.Worker:
         return _undoPolicyListWC;
-      case ClassNames.Capitalist:
+      case ClassName.Capitalist:
         return _undoPolicyListCC;
-      case ClassNames.Middle:
+      case ClassName.Middle:
         return _undoPolicyListMC;
+      default:
+        return [];
     }
   }
 
-  List<List<PriorityState>> _getUndoActionList(ClassNames className) {
+  List<List<PriorityState>> _getUndoActionList(ClassName className) {
     switch (className) {
-      case ClassNames.Worker:
+      case ClassName.Worker:
         return _undoActionListWC;
-      case ClassNames.Capitalist:
+      case ClassName.Capitalist:
         return _undoActionListCC;
-      case ClassNames.Middle:
+      case ClassName.Middle:
         return _undoActionListMC;
+      default:
+        return [];
     }
   }
 
@@ -408,7 +419,7 @@ class AutomaState extends ChangeNotifier {
     }
   }
 
-  void _storeUndoInfo(ClassNames className) {
+  void _storeUndoInfo(ClassName className) {
     // Store policy undo history
     _storeUndoInfoHelper(
         _getUndoPolicyList(className), getPolicyList(className));
@@ -426,7 +437,7 @@ class AutomaState extends ChangeNotifier {
     }
   }
 
-  Future<void> undo(ClassNames cls) async {
+  Future<void> undo(ClassName cls) async {
     // Undo last action
     List<PriorityState> oldPolicyPriorityList = [];
     for (PriorityState state in getPolicyList(cls)) {

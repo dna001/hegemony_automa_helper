@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../data/automa_state.dart';
+import '../data/board_state.dart';
 
 const rowDivider = SizedBox(width: 20);
 const colDivider = SizedBox(height: 10);
@@ -21,8 +22,8 @@ class PriorityCardData {
 }
 
 class AutomaScreen extends StatelessWidget {
-  const AutomaScreen({super.key, this.className = ClassNames.Worker});
-  final ClassNames className;
+  const AutomaScreen({super.key, this.className = ClassName.Worker});
+  final ClassName className;
 
   void onPolicyButtonPressed(BuildContext context, int id) {
     context.read<AutomaState>().incPolicyPriority(className, id);
@@ -83,9 +84,9 @@ class AutomaScreen extends StatelessWidget {
       actionPriorityCardsList.add(stateList);
     }
     List<PriorityInfo> classInfo = actionPriorityCardsWC;
-    if (className == ClassNames.Capitalist) {
+    if (className == ClassName.Capitalist) {
       classInfo = actionPriorityCardsCC;
-    } else if (className == ClassNames.Middle) {
+    } else if (className == ClassName.Middle) {
       classInfo = actionPriorityCardsMC;
     }
     List<Widget> actionSlivers = [];
@@ -153,7 +154,7 @@ class AutomaScreen extends StatelessWidget {
 }
 
 class PolicyButtons extends StatelessWidget {
-  final ClassNames className;
+  final ClassName className;
 
   const PolicyButtons({super.key, required this.className});
 
@@ -191,7 +192,7 @@ class PolicyButtons extends StatelessWidget {
 }
 
 class ActionButtons extends StatelessWidget {
-  final ClassNames className;
+  final ClassName className;
   final List<PriorityInfo> classInfo;
 
   const ActionButtons(
@@ -239,7 +240,7 @@ class PriorityGrid extends StatelessWidget {
 
   final List<PriorityCardData> priorityCardIds;
   final List<PriorityInfo> priorityCardsInfo;
-  final ClassNames className;
+  final ClassName className;
   final int count;
 
   List<PriorityCard> priorityCards() {
@@ -278,7 +279,7 @@ class PriorityCard extends StatefulWidget {
 
   final PriorityInfo info;
   final int priority;
-  final ClassNames className;
+  final ClassName className;
 
   @override
   State<PriorityCard> createState() => _PriorityCardState();
