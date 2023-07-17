@@ -10,6 +10,7 @@ import '../mc_board_widget.dart';
 import '../wc_board_widget.dart';
 import '../state_area_widget.dart';
 import '../unemployed_workers_widget.dart';
+import '../export_widget.dart';
 import '../data/board_state.dart';
 
 const double mediumWidthBreakpoint = 900;
@@ -66,6 +67,10 @@ class _OverviewScreenState extends State<OverviewScreen> {
           child: PolicyWidget(),
         ),
       ),
+      SliverToBoxAdapter(
+          child: Padding(
+              padding: const EdgeInsets.fromLTRB(16.0, 20, 16.0, 0),
+              child: ExportWidget())),
       SliverToBoxAdapter(
           child: Padding(
               padding: const EdgeInsets.fromLTRB(16.0, 20, 16.0, 0),

@@ -262,6 +262,10 @@ class BoardState extends ChangeNotifier {
     }
     return null;
   }
+
+  List<ExportCard> getExportCardList() {
+    return exportCards;
+  }
 }
 
 class CompanyInfo {
@@ -346,4 +350,119 @@ const List<CompanyInfo> companyCards = <CompanyInfo>[
   // Worker class companies
   CompanyInfo(300, ClassName.Worker, "COOPERATIVE FARM", Colors.green, 0, 2, 0,
       Icons.agriculture, Colors.green, 0, 0, 0, 0, 3, 0, 0),
+];
+
+class ExportItem {
+  const ExportItem(this.amount, this.sellPrice);
+  final int amount;
+  final int sellPrice;
+}
+
+class ExportCard {
+  const ExportCard(this.id, this.foodExportList, this.healthExportList,
+      this.luxuryExportList, this.educationExportList);
+  final int id;
+  final List<ExportItem> foodExportList;
+  final List<ExportItem> healthExportList;
+  final List<ExportItem> luxuryExportList;
+  final List<ExportItem> educationExportList;
+}
+
+const List<ExportCard> exportCards = <ExportCard>[
+  ExportCard(
+      0,
+      [ExportItem(4, 45), ExportItem(7, 80)],
+      [ExportItem(2, 15), ExportItem(6, 40)],
+      [ExportItem(3, 20), ExportItem(5, 30)],
+      [ExportItem(3, 20), ExportItem(7, 50)]),
+  ExportCard(
+      1,
+      [ExportItem(2, 15), ExportItem(6, 50)],
+      [ExportItem(4, 30), ExportItem(7, 50)],
+      [ExportItem(3, 15), ExportItem(7, 35)],
+      [ExportItem(3, 20), ExportItem(5, 35)]),
+  ExportCard(
+      2,
+      [ExportItem(3, 30), ExportItem(5, 50)],
+      [ExportItem(3, 20), ExportItem(6, 50)],
+      [ExportItem(3, 25), ExportItem(7, 55)],
+      [ExportItem(3, 20), ExportItem(7, 50)]),
+  ExportCard(
+      3,
+      [ExportItem(2, 15), ExportItem(6, 45)],
+      [ExportItem(3, 20), ExportItem(5, 30)],
+      [ExportItem(3, 20), ExportItem(7, 50)],
+      [ExportItem(4, 25), ExportItem(8, 45)]),
+  ExportCard(
+      4,
+      [ExportItem(3, 25), ExportItem(6, 50)],
+      [ExportItem(3, 20), ExportItem(7, 40)],
+      [ExportItem(3, 20), ExportItem(7, 50)],
+      [ExportItem(2, 15), ExportItem(7, 55)]),
+  ExportCard(
+      5,
+      [ExportItem(2, 20), ExportItem(6, 55)],
+      [ExportItem(3, 25), ExportItem(5, 40)],
+      [ExportItem(4, 30), ExportItem(8, 55)],
+      [ExportItem(3, 15), ExportItem(7, 35)]),
+  ExportCard(
+      6,
+      [ExportItem(4, 50), ExportItem(8, 95)],
+      [ExportItem(3, 15), ExportItem(7, 35)],
+      [ExportItem(3, 20), ExportItem(5, 30)],
+      [ExportItem(2, 15), ExportItem(6, 40)]),
+  ExportCard(
+      7,
+      [ExportItem(3, 25), ExportItem(7, 55)],
+      [ExportItem(2, 10), ExportItem(6, 35)],
+      [ExportItem(4, 25), ExportItem(8, 45)],
+      [ExportItem(3, 20), ExportItem(5, 35)]),
+  ExportCard(
+      8,
+      [ExportItem(3, 30), ExportItem(5, 50)],
+      [ExportItem(3, 25), ExportItem(7, 55)],
+      [ExportItem(2, 10), ExportItem(6, 35)],
+      [ExportItem(4, 25), ExportItem(8, 45)]),
+  ExportCard(
+      9,
+      [ExportItem(2, 25), ExportItem(6, 65)],
+      [ExportItem(3, 20), ExportItem(7, 40)],
+      [ExportItem(4, 20), ExportItem(7, 35)],
+      [ExportItem(3, 25), ExportItem(6, 45)]),
+  ExportCard(
+      10,
+      [ExportItem(2, 15), ExportItem(6, 50)],
+      [ExportItem(4, 25), ExportItem(8, 45)],
+      [ExportItem(3, 25), ExportItem(5, 40)],
+      [ExportItem(3, 15), ExportItem(7, 35)]),
+  ExportCard(
+      11,
+      [ExportItem(4, 40), ExportItem(7, 70)],
+      [ExportItem(2, 15), ExportItem(7, 50)],
+      [ExportItem(3, 25), ExportItem(6, 50)],
+      [ExportItem(3, 20), ExportItem(5, 30)]),
+  ExportCard(
+      12,
+      [ExportItem(3, 30), ExportItem(7, 70)],
+      [ExportItem(3, 20), ExportItem(5, 35)],
+      [ExportItem(4, 30), ExportItem(6, 40)],
+      [ExportItem(2, 15), ExportItem(6, 35)]),
+  ExportCard(
+      13,
+      [ExportItem(4, 45), ExportItem(8, 85)],
+      [ExportItem(3, 15), ExportItem(5, 25)],
+      [ExportItem(2, 15), ExportItem(6, 40)],
+      [ExportItem(3, 15), ExportItem(7, 35)]),
+  ExportCard(
+      14,
+      [ExportItem(3, 35), ExportItem(7, 80)],
+      [ExportItem(4, 20), ExportItem(8, 40)],
+      [ExportItem(3, 15), ExportItem(5, 25)],
+      [ExportItem(2, 15), ExportItem(6, 45)]),
+  ExportCard(
+      15,
+      [ExportItem(3, 35), ExportItem(7, 75)],
+      [ExportItem(3, 20), ExportItem(5, 35)],
+      [ExportItem(2, 10), ExportItem(6, 35)],
+      [ExportItem(4, 25), ExportItem(7, 40)]),
 ];
