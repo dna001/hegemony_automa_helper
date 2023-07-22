@@ -59,8 +59,10 @@ class CompanyListWidget extends StatelessWidget {
               ),
               IconButton(
                   icon: Icon(Icons.add),
-                  onPressed: () => companyListDialogue(context,
-                      (id) => boardState.addCompanyToFreeSlot(bsKeyBase, id))),
+                  onPressed: () => companyListDialogue(
+                      context,
+                      (id) => boardState.addCompanyToFreeSlot(bsKeyBase, id,
+                          pay: true))),
             ])));
   }
 

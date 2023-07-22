@@ -72,6 +72,7 @@ class BoardState extends ChangeNotifier {
     boardData["wc_education"] = 0;
     boardData["wc_influence"] = 1;
     boardData["wc_workers_unskilled"] = 2;
+    boardData["wc_unions"] = 0;
     // Capital Class variables
     boardData["cc_vp"] = 0;
     boardData["cc_revenue"] = 120;
@@ -153,11 +154,23 @@ class BoardState extends ChangeNotifier {
     boardData[keyBase + "_commited"] = 0;
   }
 
-  void addCompanyToFreeSlot(String keyBase, int id) {
+  void addCompanyToFreeSlot(String keyBase, int id, {bool pay = false}) {
     for (int slot = 0; slot < 16; slot++) {
       if (getItem(keyBase + slot.toString() + "_id") == 0) {
         addCompanyToSlot(keyBase + slot.toString(), id);
         print("New company $id added in slot $slot");
+        if (pay) {
+          CompanyInfo? info = getCompanyInfo(id);
+          // Remove money from owner
+          if (info!.cls == ClassName.Capitalist) {
+            incDecItem("cc_revenue", -info.price);
+          } else if (info.cls == ClassName.Middle) {
+            incDecItem("mc_income", -info.price);
+          } else if (info.cls == ClassName.State) {
+            incDecItem("sc_treasury", -info.price);
+          }
+          print("${info.cls} payed ${info.price}");
+        }
         break;
       }
     }
@@ -205,9 +218,62 @@ class BoardState extends ChangeNotifier {
     }
   }
 
-  void cycleWorkers(String companySlotKeyBase, int id) {
-    print("Cycle worker: $companySlotKeyBase company: $id");
-    print("worker type: ${getItem(companySlotKeyBase)}");
+  void cycleWorkers(String companyKeyBase, int workerSlot, int id) {
+    String companySlotKey = companyKeyBase + workerSlot.toString();
+    print("Cycle worker: $companyKeyBase, slot: $workerSlot, company: $id");
+    print("worker type: ${getItem(companySlotKey)}");
+    int workerType = getItem(companySlotKey);
+    CompanyInfo info = getCompanyInfo(id)!;
+    int newWorkerType = workerType + 1;
+    while (workerType != newWorkerType) {
+      if (newWorkerType >= WorkerType.AnyUnskilled.index) {
+        newWorkerType = WorkerType.None.index;
+        break;
+      }
+      WorkerType workerTypeSlot = info.workerSlots[workerSlot];
+      bool skilledSlot = (workerTypeSlot != WorkerType.WcUnskilled &&
+          workerTypeSlot != WorkerType.McUnskilled &&
+          workerTypeSlot != WorkerType.AnyUnskilled);
+      if (skilledSlot) {
+        if (workerTypeSlot.index == newWorkerType) {
+          break;
+        }
+        if (workerTypeSlot.index >= WorkerType.AnyUnskilled.index) {
+          if (((workerTypeSlot.index -
+                      WorkerType.AnyUnskilled.index +
+                      WorkerType.WcUnskilled.index) ==
+                  newWorkerType) ||
+              ((workerTypeSlot.index -
+                      WorkerType.AnyUnskilled.index +
+                      WorkerType.McUnskilled.index) ==
+                  newWorkerType)) {
+            break;
+          }
+        }
+      } else {
+        if (workerTypeSlot == WorkerType.WcUnskilled) {
+          if (newWorkerType >= WorkerType.WcUnskilled.index &&
+              newWorkerType <= WorkerType.WcMedia.index) {
+            break;
+          }
+        } else if (workerTypeSlot == WorkerType.McUnskilled) {
+          if (newWorkerType >= WorkerType.McUnskilled.index &&
+              newWorkerType <= WorkerType.McMedia.index) {
+            break;
+          }
+        } else if (workerTypeSlot == WorkerType.AnyUnskilled) {
+          if ((newWorkerType >= WorkerType.WcUnskilled.index &&
+                  newWorkerType <= WorkerType.WcMedia.index) ||
+              (newWorkerType >= WorkerType.McUnskilled.index &&
+                  newWorkerType <= WorkerType.McMedia.index)) {
+            break;
+          }
+        }
+      }
+      newWorkerType += 1;
+    }
+    setItem(companySlotKey, newWorkerType);
+    print("New worker type: $newWorkerType");
   }
 
   String _workerTypeToWorkerKey(int workerType) {
@@ -242,12 +308,86 @@ class BoardState extends ChangeNotifier {
     return "";
   }
 
+  int getNumWorkersInCompanies(
+      String companyKeyBase, ClassName companyClass, ClassName workerClass) {
+    int numWorkers = 0;
+    // Check capitalist company slots
+    for (int i = 0; i < getUsedCompanySlots(companyClass); i++) {
+      CompanyInfo info =
+          getCompanyInfo(getItem(companyKeyBase + i.toString() + "_id"))!;
+      for (int workerSlot = 0;
+          workerSlot < info.workerSlots.length;
+          workerSlot++) {
+        int workerType = getItem(
+            companyKeyBase + i.toString() + "_worker" + workerSlot.toString());
+        if ((workerType >= WorkerType.WcUnskilled.index &&
+                workerType <= WorkerType.WcMedia.index &&
+                workerClass == ClassName.Worker) ||
+            (workerType >= WorkerType.McUnskilled.index &&
+                workerType <= WorkerType.McMedia.index &&
+                workerClass == ClassName.Middle)) {
+          numWorkers++;
+        }
+      }
+    }
+    return numWorkers;
+  }
+
   int getNumWorkers(ClassName cls) {
-    return 10;
+    int numWorkers = 0;
+    // Check capitalist company slots
+    numWorkers +=
+        getNumWorkersInCompanies("cc_company_slot", ClassName.Capitalist, cls);
+    numWorkers +=
+        getNumWorkersInCompanies("mc_company_slot", ClassName.Middle, cls);
+    numWorkers +=
+        getNumWorkersInCompanies("sc_company_slot", ClassName.State, cls);
+    numWorkers +=
+        getNumWorkersInCompanies("wc_company_slot", ClassName.Worker, cls);
+    if (cls == ClassName.Worker) {
+      // Get unemployed workers
+      for (int i = WorkerType.WcUnskilled.index;
+          i <= WorkerType.WcMedia.index;
+          i++) {
+        numWorkers += getItem(_workerTypeToWorkerKey(i));
+      }
+      // Get union workers
+      for (CompanyType type in CompanyType.values) {
+        if (getUnionState(type)) {
+          numWorkers++;
+        }
+      }
+    } else if (cls == ClassName.Middle) {
+      // Get unemployed workers
+      for (int i = WorkerType.McUnskilled.index;
+          i <= WorkerType.McMedia.index;
+          i++) {
+        numWorkers += getItem(_workerTypeToWorkerKey(i));
+      }
+    }
+    return numWorkers;
   }
 
   int getPopulation(ClassName cls) {
     return (getNumWorkers(cls) / 3).floor();
+  }
+
+  bool getUnionState(CompanyType type) {
+    int unions = getItem("wc_unions");
+    int bit = 1 << type.index;
+    return (unions & bit == bit);
+  }
+
+  void toggleUnion(CompanyType type) {
+    int bit = 1 << type.index;
+    int unions = getItem("wc_unions");
+    if (unions & bit == bit) {
+      unions &= ~bit;
+    } else {
+      unions |= bit;
+    }
+    setItem("wc_unions", unions);
+    print("Unions updated: $unions");
   }
 
   Future<void> load({int slot = 0}) async {

@@ -132,7 +132,7 @@ class _CompanyWidgetState extends State<CompanyWidget> {
               : null,
           onTap: (widget.mode == CompanyViewMode.small)
               ? () => boardState.cycleWorkers(
-                  bsKeySlot + "_worker" + workerSlot.toString(), widget.info.id)
+                  bsKeySlot + "_worker", workerSlot, widget.info.id)
               : null));
     }
 

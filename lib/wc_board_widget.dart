@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'data/board_state.dart';
 import 'adjustable_value_widget.dart';
+import 'storage_area_widget.dart';
 import 'victory_point_widget.dart';
 
 const rowDivider = SizedBox(width: 5);
@@ -81,7 +82,7 @@ class _WorkerClassBoardState extends State<WorkerClassBoardWidget> {
                         crossAxisCount: 11, crossAxisSpacing: 2.0),
                     itemCount: 11,
                     itemBuilder: (context, index) =>
-                        ProseprityRadioListTile<int>(
+                        ProsperityRadioListTile<int>(
                       value: index,
                       groupValue: _prosperity ?? 0,
                       onChanged: (value) {
@@ -124,16 +125,54 @@ class _WorkerClassBoardState extends State<WorkerClassBoardWidget> {
                       price: 0,
                     ),
                   ]),
+              Text("LABOUR UNIONS"),
+              Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    UnionWidget(
+                        icon: Icons.agriculture,
+                        color: Colors.green,
+                        active: boardState.getUnionState(CompanyType.Food),
+                        onTap: () => boardState.toggleUnion(CompanyType.Food)),
+                    rowDivider,
+                    UnionWidget(
+                        icon: Icons.smartphone,
+                        color: Colors.blue,
+                        active: boardState.getUnionState(CompanyType.Luxury),
+                        onTap: () =>
+                            boardState.toggleUnion(CompanyType.Luxury)),
+                    rowDivider,
+                    UnionWidget(
+                        icon: Icons.heart_broken,
+                        color: Colors.red,
+                        active: boardState.getUnionState(CompanyType.Health),
+                        onTap: () =>
+                            boardState.toggleUnion(CompanyType.Health)),
+                    rowDivider,
+                    UnionWidget(
+                        icon: Icons.school,
+                        color: Colors.orange,
+                        active: boardState.getUnionState(CompanyType.Education),
+                        onTap: () =>
+                            boardState.toggleUnion(CompanyType.Education)),
+                    rowDivider,
+                    UnionWidget(
+                        icon: Icons.chat_bubble,
+                        color: Colors.purple,
+                        active: boardState.getUnionState(CompanyType.Media),
+                        onTap: () => boardState.toggleUnion(CompanyType.Media)),
+                  ]),
+              colDivider,
             ])));
   }
 }
 
-class ProseprityRadioListTile<T> extends StatelessWidget {
+class ProsperityRadioListTile<T> extends StatelessWidget {
   final int value;
   final int groupValue;
   final ValueChanged<int?> onChanged;
 
-  const ProseprityRadioListTile({
+  const ProsperityRadioListTile({
     required this.value,
     required this.groupValue,
     required this.onChanged,
@@ -176,56 +215,28 @@ class ProseprityRadioListTile<T> extends StatelessWidget {
   }
 }
 
-class StorageArea extends StatelessWidget {
-  const StorageArea(
-      {super.key,
-      required this.bsKey,
-      required this.icon,
-      required this.iconColor,
-      required this.price});
-  final String bsKey;
+class UnionWidget extends StatelessWidget {
   final IconData icon;
-  final Color iconColor;
-  final int price;
+  final Color color;
+  final bool active;
+  final VoidCallback onTap;
+
+  const UnionWidget({
+    required this.icon,
+    required this.color,
+    required this.active,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    BoardState boardState = context.watch<BoardState>();
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-      child: Column(children: <Widget>[
-        IconButton(
-            icon: Icon(Icons.add),
-            onPressed: () => boardState.incDecItem(bsKey, 1)),
-        Row(children: <Widget>[
-          Text(boardState.getItem(bsKey).toString(),
-              style: Theme.of(context).textTheme.titleMedium),
-          Icon(icon, color: iconColor),
-        ]),
-        IconButton(
-            icon: Icon(Icons.remove),
-            onPressed: () => boardState.incDecItem(bsKey, -1)),
-        (price > 0)
-            ? Text(price.toString() + "£",
-                style: Theme.of(context)
-                    .textTheme
-                    .titleMedium!
-                    .copyWith(color: Colors.orange))
-            : SizedBox(height: 1),
-      ]),
-    );
-  }
-}
-
-class VerticalDividerCustom extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return new Container(
-      height: 80.0,
-      width: 2.0,
-      color: Colors.orange,
-      margin: const EdgeInsets.only(left: 10.0, right: 10.0),
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+          height: 20,
+          //padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+          child: Icon(Icons.person,
+              color: active ? color : color.withOpacity(0.5))),
     );
   }
 }
