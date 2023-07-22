@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-enum ClassName { Worker, Capitalist, Middle, State }
+enum ClassName { None, Worker, Capitalist, Middle, State }
 
 enum WorkerType {
   None,
@@ -20,8 +20,16 @@ enum WorkerType {
   McLuxury,
   McHealth,
   McEducation,
-  McMedia
+  McMedia,
+  AnyUnskilled,
+  AnyFood,
+  AnyLuxury,
+  AnyHealth,
+  AnyEducation,
+  AnyMedia,
 }
+
+enum CompanyType { Food, Luxury, Health, Education, Media }
 
 class BoardState extends ChangeNotifier {
   int saveSlot = 0;
@@ -63,6 +71,7 @@ class BoardState extends ChangeNotifier {
     boardData["wc_health"] = 0;
     boardData["wc_education"] = 0;
     boardData["wc_influence"] = 1;
+    boardData["wc_workers_unskilled"] = 2;
     // Capital Class variables
     boardData["cc_vp"] = 0;
     boardData["cc_revenue"] = 120;
@@ -93,6 +102,7 @@ class BoardState extends ChangeNotifier {
         filled: true, cls: ClassName.Middle); // DOCTOR'S OFFICE
     addCompanyToSlot("mc_company_slot1", 101,
         filled: true, cls: ClassName.Middle); // CONVENIENCE STORE
+    boardData["mc_workers_unskilled"] = 1;
     // State variables
     boardData["sc_vp"] = 0;
     boardData["sc_treasury"] = 120;
@@ -130,15 +140,10 @@ class BoardState extends ChangeNotifier {
       {bool filled = false, ClassName cls = ClassName.Worker}) {
     boardData[keyBase + "_id"] = id;
     if (filled) {
-      boardData[keyBase + "_worker0"] = (cls == ClassName.Worker)
-          ? WorkerType.WcUnskilled.index
-          : WorkerType.McUnskilled.index;
-      boardData[keyBase + "_worker1"] = (cls == ClassName.Worker)
-          ? WorkerType.WcUnskilled.index
-          : WorkerType.McUnskilled.index;
-      boardData[keyBase + "_worker2"] = (cls == ClassName.Worker)
-          ? WorkerType.WcUnskilled.index
-          : WorkerType.McUnskilled.index;
+      CompanyInfo? info = getCompanyInfo(id);
+      for (int slot = 0; slot < info!.workerSlots.length; slot++)
+        boardData[keyBase + "_worker" + slot.toString()] =
+            _companyInfoToWorkerType(cls, info, slot);
     } else {
       boardData[keyBase + "_worker0"] = 0;
       boardData[keyBase + "_worker1"] = 0;
@@ -157,6 +162,84 @@ class BoardState extends ChangeNotifier {
       }
     }
     notifyListeners();
+  }
+
+  void sellCompany(String keyBase, int slot) {
+    String keySlot = keyBase + slot.toString();
+    int id = getItem(keySlot + "_id");
+    print("Sell company id $id");
+    CompanyInfo? info = getCompanyInfo(id);
+    int usedSlots = getUsedCompanySlots(info!.cls);
+    ;
+    // Add money to owner
+    if (info.cls == ClassName.Capitalist) {
+      incDecItem("cc_revenue", info.price);
+    } else if (info.cls == ClassName.Middle) {
+      incDecItem("mc_income", info.price);
+    } else if (info.cls == ClassName.State) {
+      incDecItem("sc_treasury", info.price);
+    }
+    // Move all workers to unemployed worker pool
+    for (int i = 0; i < 3; i++) {
+      String workerSlotKey = keySlot + "_worker" + i.toString();
+      int workerType = getItem(workerSlotKey);
+      print("Workertype: $workerType");
+      if (workerType > 0) {
+        incDecItem(_workerTypeToWorkerKey(workerType), 1);
+        setItem(workerSlotKey, 0);
+      }
+    }
+    setItem(keySlot + "_id", 0);
+    // Fill empty slot
+    for (int i = slot; i < usedSlots - 1; i++) {
+      String thisSlot = keyBase + i.toString();
+      String nextSlot = keyBase + (i + 1).toString();
+      print(nextSlot + " -> " + thisSlot);
+      setItem(thisSlot + "_id", getItem(nextSlot + "_id"));
+      setItem(thisSlot + "_worker0", getItem(nextSlot + "_worker0"));
+      setItem(thisSlot + "_worker1", getItem(nextSlot + "_worker1"));
+      setItem(thisSlot + "_worker2", getItem(nextSlot + "_worker2"));
+      setItem(thisSlot + "_price", getItem(nextSlot + "_price"));
+      setItem(thisSlot + "_commited", getItem(nextSlot + "_commited"));
+      setItem(nextSlot + "_id", 0);
+    }
+  }
+
+  void cycleWorkers(String companySlotKeyBase, int id) {
+    print("Cycle worker: $companySlotKeyBase company: $id");
+    print("worker type: ${getItem(companySlotKeyBase)}");
+  }
+
+  String _workerTypeToWorkerKey(int workerType) {
+    switch (workerType) {
+      case 1: //WorkerType.WcUnskilled
+        return "wc_workers_unskilled";
+      case 2: //WorkerType.WcFood
+        return "wc_workers_skilled_agriculture";
+      case 3: //WorkerType.WcLuxury
+        return "wc_workers_skilled_luxury";
+      case 4: //WorkerType.WcHealth
+        return "wc_workers_skilled_health";
+      case 5: //WorkerType.WcEducation
+        return "wc_workers_skilled_education";
+      case 6: //WorkerType.WcMedia
+        return "wc_workers_skilled_media";
+      case 7: //WorkerType.McUnskilled
+        return "mc_workers_unskilled";
+      case 8: //WorkerType.McFood
+        return "mc_workers_skilled_agriculture";
+      case 9: //WorkerType.McLuxury
+        return "mc_workers_skilled_luxury";
+      case 10: //WorkerType.McHealth
+        return "mc_workers_skilled_health";
+      case 11: //WorkerType.McEducation
+        return "mc_workers_skilled_education";
+      case 12: //WorkerType.McMedia
+        return "mc_workers_skilled_media";
+      default:
+        break;
+    }
+    return "";
   }
 
   int getNumWorkers(ClassName cls) {
@@ -235,6 +318,8 @@ class BoardState extends ChangeNotifier {
         key = "wc_company_slot";
         maxSlots = 2;
         break;
+      default:
+        break;
     }
     for (int slot = 0; slot < maxSlots; slot++) {
       if (getItem(key + slot.toString() + "_id") > 0) {
@@ -242,6 +327,49 @@ class BoardState extends ChangeNotifier {
       }
     }
     return usedSlots;
+  }
+
+  ClassName getWorkerClass(int workerType) {
+    ClassName cls = ClassName.None;
+    if (workerType > WorkerType.None.index &&
+        workerType < WorkerType.McUnskilled.index) {
+      cls = ClassName.Worker;
+    } else if (workerType >= WorkerType.McUnskilled.index) {
+      cls = ClassName.Middle;
+    }
+    return cls;
+  }
+
+  int _companyInfoToWorkerType(ClassName cls, CompanyInfo info, int slotIndex) {
+    int workerTypeIndex = 0;
+    if (info.workerSlots[slotIndex] == WorkerType.AnyUnskilled) {
+      workerTypeIndex = (cls == ClassName.Worker)
+          ? WorkerType.WcUnskilled.index
+          : WorkerType.McUnskilled.index;
+    } else if (info.workerSlots[slotIndex] == WorkerType.AnyFood) {
+      workerTypeIndex = (cls == ClassName.Worker)
+          ? WorkerType.WcFood.index
+          : WorkerType.McFood.index;
+    } else if (info.workerSlots[slotIndex] == WorkerType.AnyLuxury) {
+      workerTypeIndex = (cls == ClassName.Worker)
+          ? WorkerType.WcLuxury.index
+          : WorkerType.McLuxury.index;
+    } else if (info.workerSlots[slotIndex] == WorkerType.AnyHealth) {
+      workerTypeIndex = (cls == ClassName.Worker)
+          ? WorkerType.WcHealth.index
+          : WorkerType.McHealth.index;
+    } else if (info.workerSlots[slotIndex] == WorkerType.AnyEducation) {
+      workerTypeIndex = (cls == ClassName.Worker)
+          ? WorkerType.WcEducation.index
+          : WorkerType.McEducation.index;
+    } else if (info.workerSlots[slotIndex] == WorkerType.AnyMedia) {
+      workerTypeIndex = (cls == ClassName.Worker)
+          ? WorkerType.WcMedia.index
+          : WorkerType.McMedia.index;
+    } else {
+      workerTypeIndex = info.workerSlots[slotIndex].index;
+    }
+    return workerTypeIndex;
   }
 
   List<CompanyInfo> getCompanyCardList(ClassName cls) {
@@ -260,6 +388,7 @@ class BoardState extends ChangeNotifier {
         return info;
       }
     }
+    print("getCompanyInfo: Could not find $id");
     return null;
   }
 
@@ -270,86 +399,610 @@ class BoardState extends ChangeNotifier {
 
 class CompanyInfo {
   const CompanyInfo(
-      this.id,
-      this.cls,
-      this.name,
-      this.color,
-      this.price,
-      this.production,
-      this.productionExtra,
-      this.productionIcon,
-      this.iconColor,
-      this.priceHigh,
-      this.priceMid,
-      this.priceLow,
-      this.skilledWorkers,
-      this.unskilledWorkers,
-      this.mcSkilledWorkers,
-      this.mcUnskilledWorkers);
+    this.id,
+    this.cls,
+    this.name,
+    this.type,
+    this.color,
+    this.price,
+    this.production,
+    this.productionExtra,
+    this.productionIcon,
+    this.priceHigh,
+    this.priceMid,
+    this.priceLow,
+    this.workerSlots,
+  );
   final int id;
   final ClassName cls;
   final String name;
+  final CompanyType type;
   final Color color;
   final int price;
   final int production;
   final int productionExtra;
   final IconData productionIcon;
-  final Color iconColor;
   final int priceHigh;
   final int priceMid;
   final int priceLow;
-  final int skilledWorkers;
-  final int unskilledWorkers;
-  final int mcSkilledWorkers;
-  final int mcUnskilledWorkers;
+  final List<WorkerType> workerSlots;
 }
 
 const List<CompanyInfo> companyCards = <CompanyInfo>[
   // Capitalist class companies
-  CompanyInfo(1, ClassName.Capitalist, "CLINIC", Colors.red, 16, 6, 2,
-      Icons.heart_broken, Colors.white, 25, 20, 15, 1, 1, 0, 0),
-  CompanyInfo(2, ClassName.Capitalist, "COLLEGE", Colors.orange, 16, 6, 2,
-      Icons.school, Colors.orange, 25, 20, 15, 1, 1, 0, 0),
-  CompanyInfo(3, ClassName.Capitalist, "SHOPPING MALL", Colors.blue, 16, 6, 2,
-      Icons.smartphone, Colors.blue, 25, 20, 15, 1, 1, 0, 0),
-  CompanyInfo(4, ClassName.Capitalist, "SUPERMARKET", Colors.green, 16, 4, 1,
-      Icons.agriculture, Colors.green, 25, 20, 15, 1, 1, 0, 0),
+  CompanyInfo(
+      1,
+      ClassName.Capitalist,
+      "CLINIC",
+      CompanyType.Health,
+      Colors.red,
+      16,
+      6,
+      2,
+      Icons.heart_broken,
+      25,
+      20,
+      15,
+      [WorkerType.AnyHealth, WorkerType.AnyUnskilled]),
+  CompanyInfo(
+      2,
+      ClassName.Capitalist,
+      "COLLEGE",
+      CompanyType.Education,
+      Colors.orange,
+      16,
+      6,
+      2,
+      Icons.school,
+      25,
+      20,
+      15,
+      [WorkerType.AnyEducation, WorkerType.AnyUnskilled]),
+  CompanyInfo(
+      3,
+      ClassName.Capitalist,
+      "SHOPPING MALL",
+      CompanyType.Luxury,
+      Colors.blue,
+      16,
+      6,
+      2,
+      Icons.smartphone,
+      25,
+      20,
+      15,
+      [WorkerType.AnyLuxury, WorkerType.AnyUnskilled]),
+  CompanyInfo(
+      4,
+      ClassName.Capitalist,
+      "SUPERMARKET",
+      CompanyType.Food,
+      Colors.green,
+      16,
+      4,
+      1,
+      Icons.agriculture,
+      25,
+      20,
+      15,
+      [WorkerType.AnyFood, WorkerType.AnyUnskilled]),
+  CompanyInfo(
+      5,
+      ClassName.Capitalist,
+      "HOSPITAL",
+      CompanyType.Health,
+      Colors.red,
+      20,
+      7,
+      0,
+      Icons.heart_broken,
+      30,
+      20,
+      10,
+      [WorkerType.AnyHealth, WorkerType.AnyUnskilled]),
+  CompanyInfo(
+      6,
+      ClassName.Capitalist,
+      "TV STATION",
+      CompanyType.Media,
+      Colors.purple,
+      24,
+      4,
+      0,
+      Icons.chat_bubble,
+      40,
+      30,
+      20,
+      [WorkerType.AnyMedia, WorkerType.AnyUnskilled, WorkerType.AnyUnskilled]),
+  CompanyInfo(7, ClassName.Capitalist, "AUTOMATED\nGRAIN FARM",
+      CompanyType.Food, Colors.green, 25, 2, 0, Icons.agriculture, 0, 0, 0, []),
+  CompanyInfo(8, ClassName.Capitalist, "HOTEL", CompanyType.Luxury, Colors.blue,
+      15, 7, 0, Icons.smartphone, 30, 25, 20, [
+    WorkerType.AnyUnskilled,
+    WorkerType.AnyUnskilled,
+    WorkerType.AnyUnskilled
+  ]),
+  CompanyInfo(
+      9,
+      ClassName.Capitalist,
+      "RADIO STATION",
+      CompanyType.Media,
+      Colors.purple,
+      8,
+      2,
+      0,
+      Icons.chat_bubble,
+      20,
+      15,
+      10,
+      [WorkerType.AnyUnskilled, WorkerType.AnyUnskilled]),
+  CompanyInfo(
+      10,
+      ClassName.Capitalist,
+      "LOBBYING FIRM",
+      CompanyType.Media,
+      Colors.purple,
+      16,
+      3,
+      0,
+      Icons.chat_bubble,
+      30,
+      20,
+      10,
+      [WorkerType.AnyMedia, WorkerType.AnyUnskilled]),
+  CompanyInfo(
+      11,
+      ClassName.Capitalist,
+      "INSITUTE OF\nTECHNOLOGY",
+      CompanyType.Education,
+      Colors.orange,
+      20,
+      8,
+      3,
+      Icons.school,
+      40,
+      30,
+      20, [
+    WorkerType.AnyEducation,
+    WorkerType.AnyUnskilled,
+    WorkerType.AnyUnskilled
+  ]),
+  CompanyInfo(
+      12,
+      ClassName.Capitalist,
+      "FISH FARM",
+      CompanyType.Food,
+      Colors.green,
+      20,
+      6,
+      1,
+      Icons.agriculture,
+      35,
+      30,
+      25,
+      [WorkerType.AnyFood, WorkerType.AnyUnskilled, WorkerType.AnyUnskilled]),
+  CompanyInfo(
+      13,
+      ClassName.Capitalist,
+      "PHARMACEUTICAL\nCOMPANY",
+      CompanyType.Health,
+      Colors.red,
+      20,
+      8,
+      3,
+      Icons.heart_broken,
+      40,
+      30,
+      20,
+      [WorkerType.AnyHealth, WorkerType.AnyUnskilled, WorkerType.AnyUnskilled]),
+  CompanyInfo(14, ClassName.Capitalist, "UNIVERSITY", CompanyType.Education,
+      Colors.orange, 24, 9, 2, Icons.school, 40, 30, 20, [
+    WorkerType.AnyEducation,
+    WorkerType.AnyUnskilled,
+    WorkerType.AnyUnskilled
+  ]),
+  CompanyInfo(
+      15,
+      ClassName.Capitalist,
+      "ACADEMY",
+      CompanyType.Education,
+      Colors.orange,
+      20,
+      7,
+      0,
+      Icons.school,
+      30,
+      20,
+      10,
+      [WorkerType.AnyEducation, WorkerType.AnyUnskilled]),
+  CompanyInfo(
+      16,
+      ClassName.Capitalist,
+      "STADIUM",
+      CompanyType.Luxury,
+      Colors.blue,
+      20,
+      8,
+      3,
+      Icons.smartphone,
+      35,
+      30,
+      25,
+      [WorkerType.AnyLuxury, WorkerType.AnyUnskilled, WorkerType.AnyUnskilled]),
+  CompanyInfo(17, ClassName.Capitalist, "ELECTRONICS\nMANUFACTURER",
+      CompanyType.Luxury, Colors.blue, 25, 3, 0, Icons.smartphone, 0, 0, 0, []),
+  CompanyInfo(
+      18,
+      ClassName.Capitalist,
+      "FASHION COMPANY",
+      CompanyType.Luxury,
+      Colors.blue,
+      8,
+      4,
+      2,
+      Icons.smartphone,
+      20,
+      15,
+      10,
+      [WorkerType.AnyUnskilled, WorkerType.AnyUnskilled]),
+  CompanyInfo(19, ClassName.Capitalist, "PUBLISHING HOUSE", CompanyType.Media,
+      Colors.purple, 12, 3, 0, Icons.chat_bubble, 30, 25, 20, [
+    WorkerType.AnyUnskilled,
+    WorkerType.AnyUnskilled,
+    WorkerType.AnyUnskilled
+  ]),
+  CompanyInfo(20, ClassName.Capitalist, "AUTOMATED\nDAIRY FARM",
+      CompanyType.Food, Colors.green, 45, 3, 0, Icons.agriculture, 0, 0, 0, []),
+  CompanyInfo(21, ClassName.Capitalist, "CAR MANUFACTURER", CompanyType.Luxury,
+      Colors.blue, 45, 5, 0, Icons.smartphone, 0, 0, 0, []),
+  CompanyInfo(22, ClassName.Capitalist, "VEGETABLE FARM", CompanyType.Food,
+      Colors.green, 15, 5, 0, Icons.agriculture, 30, 25, 20, [
+    WorkerType.AnyUnskilled,
+    WorkerType.AnyUnskilled,
+    WorkerType.AnyUnskilled
+  ]),
+  CompanyInfo(
+      23,
+      ClassName.Capitalist,
+      "FAST FOOD CHAIN",
+      CompanyType.Food,
+      Colors.green,
+      8,
+      3,
+      0,
+      Icons.agriculture,
+      20,
+      15,
+      10,
+      [WorkerType.AnyUnskilled, WorkerType.AnyUnskilled]),
+  CompanyInfo(
+      24,
+      ClassName.Capitalist,
+      "MEDICAL VILLAGE",
+      CompanyType.Health,
+      Colors.red,
+      24,
+      9,
+      2,
+      Icons.heart_broken,
+      40,
+      30,
+      20,
+      [WorkerType.AnyHealth, WorkerType.AnyUnskilled, WorkerType.AnyUnskilled]),
   // Middle class companies
-  CompanyInfo(100, ClassName.Middle, "DOCTOR'S OFFICE", Colors.red, 12, 2, 2,
-      Icons.heart_broken, Colors.white, 10, 8, 6, 0, 1, 1, 0),
-  CompanyInfo(101, ClassName.Middle, "CONVENIENCE STORE", Colors.green, 14, 2,
-      1, Icons.agriculture, Colors.green, 10, 8, 6, 0, 1, 1, 0),
+  CompanyInfo(
+      100,
+      ClassName.Middle,
+      "DOCTOR'S OFFICE",
+      CompanyType.Health,
+      Colors.red,
+      12,
+      2,
+      2,
+      Icons.heart_broken,
+      10,
+      8,
+      6,
+      [WorkerType.McHealth, WorkerType.WcUnskilled]),
+  CompanyInfo(
+      101,
+      ClassName.Middle,
+      "CONVENIENCE STORE",
+      CompanyType.Food,
+      Colors.green,
+      14,
+      2,
+      1,
+      Icons.agriculture,
+      10,
+      8,
+      6,
+      [WorkerType.McFood, WorkerType.WcUnskilled]),
+  CompanyInfo(
+      102,
+      ClassName.Middle,
+      "FAST FOOD\nRESTAURANT",
+      CompanyType.Food,
+      Colors.green,
+      20,
+      3,
+      0,
+      Icons.agriculture,
+      0,
+      0,
+      0,
+      [WorkerType.McFood, WorkerType.McUnskilled]),
+  CompanyInfo(
+      103,
+      ClassName.Middle,
+      "PHARMACY",
+      CompanyType.Health,
+      Colors.red,
+      16,
+      4,
+      0,
+      Icons.heart_broken,
+      0,
+      0,
+      0,
+      [WorkerType.McHealth, WorkerType.McUnskilled]),
+  CompanyInfo(
+      104,
+      ClassName.Middle,
+      "JEWELRY STORE",
+      CompanyType.Luxury,
+      Colors.blue,
+      16,
+      4,
+      0,
+      Icons.smartphone,
+      0,
+      0,
+      0,
+      [WorkerType.McLuxury, WorkerType.McUnskilled]),
+  CompanyInfo(
+      105,
+      ClassName.Middle,
+      "PR AGENCY",
+      CompanyType.Media,
+      Colors.purple,
+      20,
+      3,
+      0,
+      Icons.chat_bubble,
+      0,
+      0,
+      0,
+      [WorkerType.McMedia, WorkerType.McUnskilled]),
+  CompanyInfo(
+      106,
+      ClassName.Middle,
+      "TUTORING COMPANY",
+      CompanyType.Education,
+      Colors.orange,
+      12,
+      2,
+      2,
+      Icons.school,
+      10,
+      8,
+      6,
+      [WorkerType.McEducation, WorkerType.WcUnskilled]),
+  CompanyInfo(
+      107,
+      ClassName.Middle,
+      "TUTORING CENTER",
+      CompanyType.Education,
+      Colors.orange,
+      16,
+      4,
+      0,
+      Icons.school,
+      0,
+      0,
+      0,
+      [WorkerType.McEducation, WorkerType.McUnskilled]),
+  CompanyInfo(
+      108,
+      ClassName.Middle,
+      "PRIVATE SCHOOL",
+      CompanyType.Education,
+      Colors.orange,
+      20,
+      2,
+      4,
+      Icons.school,
+      15,
+      12,
+      9,
+      [WorkerType.McEducation, WorkerType.WcEducation]),
+  CompanyInfo(
+      109,
+      ClassName.Middle,
+      "REGIONAL RADIO\nSTATION",
+      CompanyType.Media,
+      Colors.purple,
+      20,
+      2,
+      2,
+      Icons.chat_bubble,
+      15,
+      12,
+      9,
+      [WorkerType.McMedia, WorkerType.WcMedia]),
+  CompanyInfo(
+      110,
+      ClassName.Middle,
+      "ORGANIC FARM",
+      CompanyType.Food,
+      Colors.green,
+      20,
+      2,
+      2,
+      Icons.agriculture,
+      15,
+      12,
+      9,
+      [WorkerType.McFood, WorkerType.McFood]),
+  CompanyInfo(
+      111,
+      ClassName.Middle,
+      "MEDICAL LABORATORY",
+      CompanyType.Health,
+      Colors.red,
+      20,
+      2,
+      4,
+      Icons.heart_broken,
+      15,
+      12,
+      9,
+      [WorkerType.McHealth, WorkerType.WcHealth]),
+  CompanyInfo(
+      112,
+      ClassName.Middle,
+      "GAME STORE",
+      CompanyType.Luxury,
+      Colors.blue,
+      12,
+      2,
+      2,
+      Icons.smartphone,
+      10,
+      8,
+      6,
+      [WorkerType.McLuxury, WorkerType.WcUnskilled]),
+  CompanyInfo(
+      113,
+      ClassName.Middle,
+      "LOCAL NEWSPAPER",
+      CompanyType.Media,
+      Colors.purple,
+      14,
+      2,
+      1,
+      Icons.chat_bubble,
+      10,
+      8,
+      6,
+      [WorkerType.McMedia, WorkerType.WcUnskilled]),
+  CompanyInfo(
+      114,
+      ClassName.Middle,
+      "ELECTRONICS STORE",
+      CompanyType.Luxury,
+      Colors.blue,
+      20,
+      2,
+      4,
+      Icons.smartphone,
+      15,
+      12,
+      9,
+      [WorkerType.McLuxury, WorkerType.WcLuxury]),
   // State class companies
-  CompanyInfo(200, ClassName.State, "UNIVERSITY HOSPITAL", Colors.red, 30, 6, 0,
-      Icons.heart_broken, Colors.white, 35, 30, 25, 1, 2, 0, 0),
-  CompanyInfo(201, ClassName.State, "TECHNICAL UNIVERSITY", Colors.orange, 30,
-      6, 0, Icons.school, Colors.orange, 35, 30, 25, 1, 2, 0, 0),
+  CompanyInfo(
+      200,
+      ClassName.State,
+      "UNIVERSITY\nHOSPITAL",
+      CompanyType.Health,
+      Colors.red,
+      30,
+      6,
+      0,
+      Icons.heart_broken,
+      35,
+      30,
+      25,
+      [WorkerType.AnyHealth, WorkerType.AnyUnskilled, WorkerType.AnyUnskilled]),
+  CompanyInfo(
+      201,
+      ClassName.State,
+      "TECHNICAL\nUNIVERSITY",
+      CompanyType.Education,
+      Colors.orange,
+      30,
+      6,
+      0,
+      Icons.school,
+      35,
+      30,
+      25, [
+    WorkerType.AnyEducation,
+    WorkerType.AnyUnskilled,
+    WorkerType.AnyUnskilled
+  ]),
   CompanyInfo(
       202,
       ClassName.State,
-      "NATIONAL PUBLIC BROADCASTING",
+      "NATIONAL PUBLIC\nBROADCASTING",
+      CompanyType.Media,
       Colors.purple,
       30,
       4,
       0,
       Icons.chat_bubble,
-      Colors.purple,
       35,
       30,
       25,
-      1,
+      [WorkerType.AnyMedia, WorkerType.AnyUnskilled, WorkerType.AnyUnskilled]),
+  CompanyInfo(
+      203,
+      ClassName.State,
+      "PUBLIC HOSPITAL",
+      CompanyType.Health,
+      Colors.red,
+      20,
+      4,
+      0,
+      Icons.heart_broken,
+      25,
+      20,
+      15,
+      [WorkerType.AnyHealth, WorkerType.AnyUnskilled]),
+  CompanyInfo(
+      204,
+      ClassName.State,
+      "PUBLIC UNIVERSITY",
+      CompanyType.Education,
+      Colors.orange,
+      20,
+      4,
+      0,
+      Icons.school,
+      25,
+      20,
+      15,
+      [WorkerType.AnyEducation, WorkerType.AnyUnskilled]),
+  CompanyInfo(
+      205,
+      ClassName.State,
+      "REGIONAL\nTV STATION",
+      CompanyType.Media,
+      Colors.purple,
+      20,
+      3,
+      0,
+      Icons.chat_bubble,
+      25,
+      20,
+      15,
+      [WorkerType.AnyMedia, WorkerType.AnyUnskilled]),
+  // Worker class companies
+  CompanyInfo(
+      300,
+      ClassName.Worker,
+      "COOPERATIVE FARM",
+      CompanyType.Food,
+      Colors.green,
+      0,
       2,
       0,
-      0),
-  CompanyInfo(203, ClassName.State, "PUBLIC HOSPITAL", Colors.red, 20, 4, 0,
-      Icons.heart_broken, Colors.white, 25, 20, 15, 1, 1, 0, 0),
-  CompanyInfo(204, ClassName.State, "PUBLIC UNIVERSITY", Colors.orange, 20, 4,
-      0, Icons.school, Colors.orange, 25, 20, 15, 1, 1, 0, 0),
-  CompanyInfo(205, ClassName.State, "REGIONAL TV STATION", Colors.purple, 20, 3,
-      0, Icons.chat_bubble, Colors.purple, 25, 20, 15, 1, 1, 0, 0),
-  // Worker class companies
-  CompanyInfo(300, ClassName.Worker, "COOPERATIVE FARM", Colors.green, 0, 2, 0,
-      Icons.agriculture, Colors.green, 0, 0, 0, 0, 3, 0, 0),
+      Icons.agriculture,
+      0,
+      0,
+      0,
+      [WorkerType.McUnskilled, WorkerType.McUnskilled, WorkerType.McUnskilled]),
 ];
 
 class ExportItem {

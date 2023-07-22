@@ -43,18 +43,18 @@ class CompanyListWidget extends StatelessWidget {
                       .copyWith(color: Colors.orange)),
               colDivider,
               SizedBox(
-                height: 145,
+                height: 160,
                 child: GridView.builder(
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
                       crossAxisSpacing: 2.0,
-                      childAspectRatio: 1.25),
+                      childAspectRatio: 1.0),
                   itemCount: boardState.getUsedCompanySlots(cls),
                   itemBuilder: (context, index) => CompanyWidget(
                       info: boardState.getCompanyInfo(boardState
                           .getItem(bsKeyBase + index.toString() + "_id"))!,
-                      //onEdit: () => {companyEditDialogue(context, index)},
-                      bsKeyBase: bsKeyBase + index.toString()),
+                      bsKeyBase: bsKeyBase,
+                      slot: index),
                 ),
               ),
               IconButton(
@@ -62,22 +62,6 @@ class CompanyListWidget extends StatelessWidget {
                   onPressed: () => companyListDialogue(context,
                       (id) => boardState.addCompanyToFreeSlot(bsKeyBase, id))),
             ])));
-  }
-
-  Future<void> companyEditDialogue(BuildContext context, int id) {
-    BoardState boardState = context.read<BoardState>();
-
-    return showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return SimpleDialog(children: <Widget>[
-            CompanyWidget(
-                info: boardState.getCompanyInfo(
-                    boardState.getItem(bsKeyBase + id.toString() + "_id"))!,
-                mode: CompanyViewMode.edit,
-                bsKeyBase: bsKeyBase + id.toString()),
-          ]);
-        });
   }
 
   Future<void> companyListDialogue(
@@ -100,7 +84,8 @@ class CompanyListWidget extends StatelessWidget {
                         onAdd(companyInfoList[index].id),
                         Navigator.pop(context)
                       },
-                  bsKeyBase: bsKeyBase + index.toString()),
+                  bsKeyBase: bsKeyBase,
+                  slot: index),
             ),
           ));
         });

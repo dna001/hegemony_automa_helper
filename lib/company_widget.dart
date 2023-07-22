@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'data/board_state.dart';
@@ -14,11 +15,13 @@ class CompanyWidget extends StatefulWidget {
       {required this.info,
       this.mode = CompanyViewMode.small,
       this.onAdd,
-      required this.bsKeyBase});
+      required this.bsKeyBase,
+      required this.slot});
   final CompanyInfo info;
   final CompanyViewMode mode;
   final VoidCallback? onAdd;
   final String bsKeyBase;
+  final int slot;
 
   @override
   State<CompanyWidget> createState() => _CompanyWidgetState();
@@ -31,53 +34,29 @@ class _CompanyWidgetState extends State<CompanyWidget> {
   Widget build(BuildContext context) {
     final BoardState boardState = context.watch<BoardState>();
     Widget priceRow = SizedBox(width: 1);
+    String bsKeySlot = widget.bsKeyBase + widget.slot.toString();
 
-    if (widget.mode == CompanyViewMode.edit) {
-      priceRow =
-          Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
-        Radio<int>(
-          fillColor:
-              MaterialStateColor.resolveWith((states) => Colors.redAccent),
-          focusColor:
-              MaterialStateColor.resolveWith((states) => Colors.redAccent),
-          value: 0,
-          groupValue: _priceSlot,
-          onChanged: (value) {
-            setState(() {
-              _priceSlot = value;
-            });
-          },
-        ),
-        Text(widget.info.priceHigh.toString() + "£"),
-        Radio<int>(
-          fillColor: MaterialStateColor.resolveWith((states) => Colors.yellow),
-          focusColor: MaterialStateColor.resolveWith((states) => Colors.yellow),
-          value: 1,
-          groupValue: _priceSlot,
-          onChanged: (value) {
-            setState(() {
-              _priceSlot = value;
-            });
-          },
-        ),
-        Text(widget.info.priceMid.toString() + "£"),
-        Radio<int>(
-          fillColor:
-              MaterialStateColor.resolveWith((states) => Colors.blueAccent),
-          focusColor:
-              MaterialStateColor.resolveWith((states) => Colors.blueAccent),
-          value: 2,
-          groupValue: _priceSlot,
-          onChanged: (value) {
-            setState(() {
-              _priceSlot = value;
-            });
-          },
-        ),
-        Text(widget.info.priceLow.toString() + "£"),
-      ]);
+    if (widget.mode == CompanyViewMode.select) {
+      priceRow = Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: <Widget>[
+            Text(widget.info.priceHigh.toString() + "£",
+                style: TextStyle(
+                  color: Colors.red,
+                  //fontWeight: FontWeight.bold,
+                  //fontSize: 12)
+                )),
+            Text(widget.info.priceMid.toString() + "£",
+                style: TextStyle(
+                  color: Colors.yellow,
+                )),
+            Text(widget.info.priceLow.toString() + "£",
+                style: TextStyle(
+                  color: Colors.blue,
+                )),
+          ]);
     } else if (widget.mode == CompanyViewMode.small) {
-      int priceSlot = boardState.getItem(widget.bsKeyBase + "_price");
+      int priceSlot = boardState.getItem(bsKeySlot + "_price");
       Color color = (priceSlot == 0)
           ? Colors.red
           : (priceSlot == 1)
@@ -94,7 +73,7 @@ class _CompanyWidgetState extends State<CompanyWidget> {
             //width: 40,
             //padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              shape: BoxShape.rectangle,
+              shape: BoxShape.circle,
               color: color,
             ),
             child: TextButton(
@@ -104,46 +83,77 @@ class _CompanyWidgetState extends State<CompanyWidget> {
                       //fontWeight: FontWeight.bold,
                       fontSize: 12)),
               onPressed: () => {
-                if (boardState.getItem(widget.bsKeyBase + "_price") == 0)
-                  {boardState.setItem(widget.bsKeyBase + "_price", 2)}
-                else if (boardState.getItem(widget.bsKeyBase + "_price") == 1)
-                  {boardState.setItem(widget.bsKeyBase + "_price", 0)}
+                if (boardState.getItem(bsKeySlot + "_price") == 0)
+                  {boardState.setItem(bsKeySlot + "_price", 2)}
+                else if (boardState.getItem(bsKeySlot + "_price") == 1)
+                  {boardState.setItem(bsKeySlot + "_price", 0)}
                 else
-                  {boardState.setItem(widget.bsKeyBase + "_price", 1)}
+                  {boardState.setItem(bsKeySlot + "_price", 1)}
               },
             ),
           ));
     }
 
     List<Widget> workerRowWidgets = [];
-    if (widget.info.skilledWorkers > 0) {
-      workerRowWidgets.add(
-        Icon(Icons.people_alt, color: widget.info.iconColor),
-      );
-      for (int i = 0; i < widget.info.unskilledWorkers; i++) {
-        workerRowWidgets.add(
-          Icon(Icons.people_alt, color: Colors.grey),
-        );
+    for (int workerSlot = 0;
+        workerSlot < widget.info.workerSlots.length;
+        workerSlot++) {
+      WorkerType workerType = widget.info.workerSlots[workerSlot];
+      IconData baseIcon = (workerType.index >= WorkerType.AnyUnskilled.index)
+          ? Icons.people_alt
+          : (workerType.index >= WorkerType.McUnskilled.index)
+              ? Icons.engineering
+              : Icons.person;
+      bool isSkilled = (workerType != WorkerType.WcUnskilled &&
+          workerType != WorkerType.McUnskilled &&
+          workerType != WorkerType.AnyUnskilled);
+      ClassName cls = boardState.getWorkerClass(
+          boardState.getItem(bsKeySlot + "_worker" + workerSlot.toString()));
+      bool occupied =
+          boardState.getItem(bsKeySlot + "_worker" + workerSlot.toString()) > 0;
+      if (widget.mode == CompanyViewMode.select) {
+        occupied = false;
       }
-    }
-    if (widget.info.mcSkilledWorkers > 0) {
-      for (int i = 0; i < widget.info.mcSkilledWorkers; i++) {
-        workerRowWidgets.add(
-          Icon(Icons.engineering, color: widget.info.iconColor),
-        );
-      }
-      for (int i = 0; i < widget.info.unskilledWorkers; i++) {
-        workerRowWidgets.add(
-          Icon(Icons.person, color: Colors.grey),
-        );
-      }
+
+      workerRowWidgets.add(WorkerWidget(
+          info: widget.info,
+          workerBaseIconData: baseIcon,
+          iconColor: (isSkilled)
+              ? (widget.info.type == CompanyType.Health)
+                  ? Colors.white
+                  : widget.info.color
+              : Colors.grey,
+          workerIconData: (occupied)
+              ? (cls == ClassName.Worker)
+                  ? Icons.person
+                  : (cls == ClassName.Middle)
+                      ? Icons.engineering
+                      : null
+              : null,
+          onTap: (widget.mode == CompanyViewMode.small)
+              ? () => boardState.cycleWorkers(
+                  bsKeySlot + "_worker" + workerSlot.toString(), widget.info.id)
+              : null));
     }
 
     return Material(
       borderRadius: BorderRadius.all(Radius.circular(10.0)),
       color: widget.info.color,
       child: Column(children: <Widget>[
-        Text(widget.info.name + " " + widget.info.price.toString() + "£"),
+        Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: <Widget>[
+              Text(widget.info.name),
+              Column(children: <Widget>[
+                Text(widget.info.price.toString() + "£"),
+                (widget.mode == CompanyViewMode.small)
+                    ? IconButton(
+                        icon: Icon(Icons.monetization_on),
+                        onPressed: () => boardState.sellCompany(
+                            widget.bsKeyBase, widget.slot))
+                    : SizedBox(width: 10),
+              ]),
+            ]),
         Padding(
             padding: const EdgeInsets.fromLTRB(4, 4, 4, 4),
             child: Material(
@@ -158,7 +168,7 @@ class _CompanyWidgetState extends State<CompanyWidget> {
                             color: widget.info.color),
                         rowDivider,
                         (widget.info.productionExtra > 0)
-                            ? (widget.info.mcSkilledWorkers > 0)
+                            ? (widget.info.cls == ClassName.Middle)
                                 ? Icon(Icons.person, color: Colors.grey)
                                 : Icon(Icons.settings)
                             : SizedBox(width: 1),
@@ -171,8 +181,7 @@ class _CompanyWidgetState extends State<CompanyWidget> {
                                 color: widget.info.color)
                             : SizedBox(width: 1),
                       ]),
-                  (widget.info.skilledWorkers + widget.info.unskilledWorkers >
-                          0)
+                  (widget.info.workerSlots.length > 0)
                       ? Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[...workerRowWidgets])
@@ -183,6 +192,38 @@ class _CompanyWidgetState extends State<CompanyWidget> {
             ? IconButton(
                 icon: Icon(Icons.add_business), onPressed: widget.onAdd)
             : SizedBox(width: 1),
+      ]),
+    );
+  }
+}
+
+class WorkerWidget extends StatelessWidget {
+  const WorkerWidget({
+    required this.info,
+    required this.workerBaseIconData,
+    required this.iconColor,
+    this.workerIconData,
+    this.onTap,
+  });
+  final CompanyInfo info;
+  final IconData workerBaseIconData;
+  final Color iconColor;
+  final IconData? workerIconData;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () => onTap?.call(),
+      child: Stack(alignment: Alignment.center, children: [
+        // Base unoccuppied
+        (workerIconData != null)
+            ? Icon(workerIconData, color: iconColor, size: 30)
+            : Icon(workerBaseIconData,
+                color: (workerIconData != null)
+                    ? Colors.grey
+                    : iconColor.withOpacity(0.5),
+                size: 30)
       ]),
     );
   }
