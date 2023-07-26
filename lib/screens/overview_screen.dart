@@ -11,6 +11,7 @@ import '../wc_board_widget.dart';
 import '../state_area_widget.dart';
 import '../unemployed_workers_widget.dart';
 import '../export_widget.dart';
+import '../round_and_tax_widget.dart';
 import '../data/board_state.dart';
 
 const double mediumWidthBreakpoint = 900;
@@ -64,6 +65,12 @@ class _OverviewScreenState extends State<OverviewScreen> {
       SliverToBoxAdapter(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16.0, 20, 16.0, 0),
+          child: RoundAndTaxWidget(),
+        ),
+      ),
+      SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16.0, 20, 16.0, 0),
           child: PolicyWidget(),
         ),
       ),
@@ -92,6 +99,14 @@ class _OverviewScreenState extends State<OverviewScreen> {
           child: Padding(
               padding: const EdgeInsets.fromLTRB(16.0, 20, 16.0, 0),
               child: WorkerClassBoardWidget())),
+      SliverToBoxAdapter(
+          child: Padding(
+              padding: const EdgeInsets.fromLTRB(16.0, 20, 16.0, 0),
+              child: CompanyListWidget(
+                  title: "WORKING CLASS COMPANIES",
+                  cls: ClassName.Worker,
+                  borderColor: Colors.red,
+                  bsKeyBase: "wc_company_slot"))),
       SliverToBoxAdapter(
           child: Padding(
               padding: const EdgeInsets.fromLTRB(16.0, 20, 16.0, 0),

@@ -53,6 +53,10 @@ class _WorkerClassBoardState extends State<WorkerClassBoardWidget> {
                     Icon(Icons.groups, color: Colors.red),
                     rowDivider,
                     Text(boardState.getPopulation(ClassName.Worker).toString()),
+                    rowDivider,
+                    Icon(Icons.assignment_ind, color: Colors.red),
+                    rowDivider,
+                    Text(boardState.getItem("wc_bill_markers").toString()),
                   ]),
               colDivider,
               Column(children: <Widget>[
@@ -144,7 +148,7 @@ class _WorkerClassBoardState extends State<WorkerClassBoardWidget> {
                     rowDivider,
                     UnionWidget(
                         icon: Icons.heart_broken,
-                        color: Colors.red,
+                        color: Colors.white,
                         active: boardState.getUnionState(CompanyType.Health),
                         onTap: () =>
                             boardState.toggleUnion(CompanyType.Health)),

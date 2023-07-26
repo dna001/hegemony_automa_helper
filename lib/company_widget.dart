@@ -104,9 +104,14 @@ class _CompanyWidgetState extends State<CompanyWidget> {
           : (workerType.index >= WorkerType.McUnskilled.index)
               ? Icons.engineering
               : Icons.person;
-      bool isSkilled = (workerType != WorkerType.WcUnskilled &&
+      bool isSkilledSlot = (workerType != WorkerType.WcUnskilled &&
           workerType != WorkerType.McUnskilled &&
           workerType != WorkerType.AnyUnskilled);
+      int worker =
+          boardState.getItem(bsKeySlot + "_worker" + workerSlot.toString());
+      bool isSkilledWorker = (worker != 0 &&
+          worker != WorkerType.WcUnskilled.index &&
+          worker != WorkerType.McUnskilled.index);
       ClassName cls = boardState.getWorkerClass(
           boardState.getItem(bsKeySlot + "_worker" + workerSlot.toString()));
       bool occupied =
@@ -118,11 +123,13 @@ class _CompanyWidgetState extends State<CompanyWidget> {
       workerRowWidgets.add(WorkerWidget(
           info: widget.info,
           workerBaseIconData: baseIcon,
-          iconColor: (isSkilled)
-              ? (widget.info.type == CompanyType.Health)
-                  ? Colors.white
-                  : widget.info.color
-              : Colors.grey,
+          iconColor: (isSkilledWorker)
+              ? _getWorkerColor(worker)
+              : (isSkilledSlot)
+                  ? (widget.info.type == CompanyType.Health)
+                      ? Colors.white
+                      : widget.info.color
+                  : Colors.grey,
           workerIconData: (occupied)
               ? (cls == ClassName.Worker)
                   ? Icons.person
@@ -194,6 +201,26 @@ class _CompanyWidgetState extends State<CompanyWidget> {
             : SizedBox(width: 1),
       ]),
     );
+  }
+
+  Color _getWorkerColor(int workerType) {
+    if (workerType == WorkerType.WcFood.index ||
+        workerType == WorkerType.McFood.index) {
+      return Colors.green;
+    } else if (workerType == WorkerType.WcLuxury.index ||
+        workerType == WorkerType.McLuxury.index) {
+      return Colors.blue;
+    } else if (workerType == WorkerType.WcHealth.index ||
+        workerType == WorkerType.McHealth.index) {
+      return Colors.white;
+    } else if (workerType == WorkerType.WcEducation.index ||
+        workerType == WorkerType.McEducation.index) {
+      return Colors.orange;
+    } else if (workerType == WorkerType.WcMedia.index ||
+        workerType == WorkerType.McMedia.index) {
+      return Colors.purple;
+    }
+    return Colors.black;
   }
 }
 

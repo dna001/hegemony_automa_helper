@@ -29,7 +29,7 @@ enum WorkerType {
   AnyMedia,
 }
 
-enum CompanyType { Food, Luxury, Health, Education, Media }
+enum CompanyType { Food, Luxury, Health, Education, Media, Any }
 
 class BoardState extends ChangeNotifier {
   int saveSlot = 0;
@@ -60,10 +60,17 @@ class BoardState extends ChangeNotifier {
     boardData["policy_ed"] = 2;
     boardData["policy_ft"] = 1;
     boardData["policy_im"] = 1;
+    boardData["policy_fp_bill"] = 0;
+    boardData["policy_lm_bill"] = 0;
+    boardData["policy_tx_bill"] = 0;
+    boardData["policy_hb_bill"] = 0;
+    boardData["policy_ed_bill"] = 0;
+    boardData["policy_ft_bill"] = 0;
+    boardData["policy_im_bill"] = 0;
     boardData["round"] = 1;
-    boardData["tax_multiplier"] = 5;
     // Worker Class variables
     boardData["wc_vp"] = 0;
+    boardData["wc_bill_markers"] = 3;
     boardData["wc_income"] = 30;
     boardData["wc_prosperity"] = 0;
     boardData["wc_food"] = 0;
@@ -75,6 +82,7 @@ class BoardState extends ChangeNotifier {
     boardData["wc_unions"] = 0;
     // Capital Class variables
     boardData["cc_vp"] = 0;
+    boardData["cc_bill_markers"] = 3;
     boardData["cc_revenue"] = 120;
     boardData["cc_capital"] = 0;
     boardData["cc_wealth"] = 0;
@@ -92,6 +100,7 @@ class BoardState extends ChangeNotifier {
         filled: true, cls: ClassName.Worker); // SUPERMARKET
     // Middle Class variables
     boardData["mc_vp"] = 0;
+    boardData["mc_bill_markers"] = 3;
     boardData["mc_income"] = 40;
     boardData["mc_prosperity"] = 0;
     boardData["mc_storage_food"] = 1;
@@ -100,12 +109,13 @@ class BoardState extends ChangeNotifier {
     boardData["mc_storage_education"] = 0;
     boardData["mc_influence"] = 1;
     addCompanyToSlot("mc_company_slot0", 100,
-        filled: true, cls: ClassName.Middle); // DOCTOR'S OFFICE
+        filled: true, cls: ClassName.Middle, slotLimit: 1); // DOCTOR'S OFFICE
     addCompanyToSlot("mc_company_slot1", 101,
-        filled: true, cls: ClassName.Middle); // CONVENIENCE STORE
+        filled: true, cls: ClassName.Middle, slotLimit: 1); // CONVENIENCE STORE
     boardData["mc_workers_unskilled"] = 1;
     // State variables
     boardData["sc_vp"] = 0;
+    boardData["sc_bill_markers"] = 3;
     boardData["sc_treasury"] = 120;
     boardData["sc_storage_health"] = 6;
     boardData["sc_storage_education"] = 6;
@@ -138,13 +148,17 @@ class BoardState extends ChangeNotifier {
   }
 
   void addCompanyToSlot(String keyBase, int id,
-      {bool filled = false, ClassName cls = ClassName.Worker}) {
+      {bool filled = false,
+      ClassName cls = ClassName.Worker,
+      int slotLimit = 3}) {
     boardData[keyBase + "_id"] = id;
     if (filled) {
       CompanyInfo? info = getCompanyInfo(id);
       for (int slot = 0; slot < info!.workerSlots.length; slot++)
-        boardData[keyBase + "_worker" + slot.toString()] =
-            _companyInfoToWorkerType(cls, info, slot);
+        if (slot < slotLimit) {
+          boardData[keyBase + "_worker" + slot.toString()] =
+              _companyInfoToWorkerType(cls, info, slot);
+        }
     } else {
       boardData[keyBase + "_worker0"] = 0;
       boardData[keyBase + "_worker1"] = 0;
@@ -308,25 +322,56 @@ class BoardState extends ChangeNotifier {
     return "";
   }
 
+  int getTaxMultiplier() {
+    int taxPolicy = getItem("policy_tx");
+    int taxBase = 1;
+    int wellfareMulti = 0;
+    if (taxPolicy == 0) {
+      taxBase = 3;
+      wellfareMulti = 2;
+    } else if (taxPolicy == 1) {
+      taxBase = 2;
+      wellfareMulti = 1;
+    }
+    int hbPolicy = getItem("policy_hb");
+    int edPolicy = getItem("policy_ed");
+    taxBase += (hbPolicy == 0)
+        ? 2 * wellfareMulti
+        : (hbPolicy == 1)
+            ? 1 * wellfareMulti
+            : 0;
+    taxBase += (edPolicy == 0)
+        ? 2 * wellfareMulti
+        : (edPolicy == 1)
+            ? 1 * wellfareMulti
+            : 0;
+    return taxBase;
+  }
+
   int getNumWorkersInCompanies(
-      String companyKeyBase, ClassName companyClass, ClassName workerClass) {
+      String companyKeyBase, ClassName companyClass, ClassName workerClass,
+      {CompanyType typeFilter = CompanyType.Any}) {
     int numWorkers = 0;
     // Check capitalist company slots
     for (int i = 0; i < getUsedCompanySlots(companyClass); i++) {
       CompanyInfo info =
           getCompanyInfo(getItem(companyKeyBase + i.toString() + "_id"))!;
-      for (int workerSlot = 0;
-          workerSlot < info.workerSlots.length;
-          workerSlot++) {
-        int workerType = getItem(
-            companyKeyBase + i.toString() + "_worker" + workerSlot.toString());
-        if ((workerType >= WorkerType.WcUnskilled.index &&
-                workerType <= WorkerType.WcMedia.index &&
-                workerClass == ClassName.Worker) ||
-            (workerType >= WorkerType.McUnskilled.index &&
-                workerType <= WorkerType.McMedia.index &&
-                workerClass == ClassName.Middle)) {
-          numWorkers++;
+      if (typeFilter == CompanyType.Any || typeFilter == info.type) {
+        for (int workerSlot = 0;
+            workerSlot < info.workerSlots.length;
+            workerSlot++) {
+          int workerType = getItem(companyKeyBase +
+              i.toString() +
+              "_worker" +
+              workerSlot.toString());
+          if ((workerType >= WorkerType.WcUnskilled.index &&
+                  workerType <= WorkerType.WcMedia.index &&
+                  workerClass == ClassName.Worker) ||
+              (workerType >= WorkerType.McUnskilled.index &&
+                  workerType <= WorkerType.McMedia.index &&
+                  workerClass == ClassName.Middle)) {
+            numWorkers++;
+          }
         }
       }
     }
@@ -384,10 +429,79 @@ class BoardState extends ChangeNotifier {
     if (unions & bit == bit) {
       unions &= ~bit;
     } else {
-      unions |= bit;
+      int numWorkers = getNumWorkersInCompanies(
+          "cc_company_slot", ClassName.Capitalist, ClassName.Worker,
+          typeFilter: type);
+      numWorkers += getNumWorkersInCompanies(
+          "mc_company_slot", ClassName.Middle, ClassName.Worker,
+          typeFilter: type);
+      numWorkers += getNumWorkersInCompanies(
+          "sc_company_slot", ClassName.State, ClassName.Worker,
+          typeFilter: type);
+      numWorkers += getNumWorkersInCompanies(
+          "wc_company_slot", ClassName.Worker, ClassName.Worker,
+          typeFilter: type);
+      if (numWorkers >= 4) {
+        unions |= bit;
+      }
     }
     setItem("wc_unions", unions);
     print("Unions updated: $unions");
+  }
+
+  void togglePolicyBill(String policyKey, int slot) {
+    // policy_x_bill bit mapping:
+    // bits 3..0: A, bits 7..4: B, bits 11..8: C
+    int policyBill = getItem(policyKey + "_bill");
+    int policyBillClass = (policyBill >> (slot * 4)) & 0xf;
+    int newPolicyBillClass = policyBillClass + 1;
+    // Remove old bill marker
+    if (policyBillClass == ClassName.Worker.index) {
+      incDecItem("wc_bill_markers", 1);
+    } else if (policyBillClass == ClassName.Middle.index) {
+      incDecItem("mc_bill_markers", 1);
+    } else if (policyBillClass == ClassName.Capitalist.index) {
+      incDecItem("cc_bill_markers", 1);
+    } else if (policyBillClass == ClassName.State.index) {
+      incDecItem("sc_bill_markers", 1);
+    }
+    while (true) {
+      if (newPolicyBillClass == ClassName.Worker.index) {
+        int billMarkers = getItem("wc_bill_markers");
+        if (billMarkers > 0) {
+          incDecItem("wc_bill_markers", -1);
+          break;
+        }
+      } else if (newPolicyBillClass == ClassName.Middle.index) {
+        int billMarkers = getItem("mc_bill_markers");
+        if (billMarkers > 0) {
+          incDecItem("mc_bill_markers", -1);
+          break;
+        }
+      } else if (newPolicyBillClass == ClassName.Capitalist.index) {
+        int billMarkers = getItem("cc_bill_markers");
+        if (billMarkers > 0) {
+          incDecItem("cc_bill_markers", -1);
+          break;
+        }
+      } else if (newPolicyBillClass == ClassName.State.index) {
+        int billMarkers = getItem("sc_bill_markers");
+        if (billMarkers > 0) {
+          incDecItem("sc_bill_markers", -1);
+          break;
+        }
+      } else if (newPolicyBillClass > ClassName.State.index) {
+        newPolicyBillClass = ClassName.None.index;
+        break;
+      }
+      newPolicyBillClass += 1;
+    }
+    if (policyBillClass != newPolicyBillClass) {
+      policyBill &= ~(0xf << (slot * 4));
+      policyBill |= newPolicyBillClass << (slot * 4);
+      setItem(policyKey + "_bill", policyBill);
+    }
+    print("Policy bill $policyKey, $slot, policyBill: $policyBill");
   }
 
   Future<void> load({int slot = 0}) async {
@@ -1142,7 +1256,7 @@ const List<CompanyInfo> companyCards = <CompanyInfo>[
       0,
       0,
       0,
-      [WorkerType.McUnskilled, WorkerType.McUnskilled, WorkerType.McUnskilled]),
+      [WorkerType.WcUnskilled, WorkerType.WcUnskilled, WorkerType.WcUnskilled]),
 ];
 
 class ExportItem {

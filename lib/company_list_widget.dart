@@ -36,11 +36,27 @@ class CompanyListWidget extends StatelessWidget {
         child: Padding(
             padding: const EdgeInsets.fromLTRB(6, 6, 6, 6),
             child: Column(children: <Widget>[
-              Text(title,
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleMedium!
-                      .copyWith(color: Colors.orange)),
+              Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Text(title,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium!
+                            .copyWith(color: Colors.orange)),
+                    Row(children: <Widget>[
+                      Icon(Icons.person, color: Colors.grey),
+                      Text(boardState
+                          .getNumWorkersInCompanies(
+                              bsKeyBase, cls, ClassName.Worker)
+                          .toString()),
+                      Icon(Icons.engineering, color: Colors.grey),
+                      Text(boardState
+                          .getNumWorkersInCompanies(
+                              bsKeyBase, cls, ClassName.Middle)
+                          .toString()),
+                    ]),
+                  ]),
               colDivider,
               SizedBox(
                 height: 160,

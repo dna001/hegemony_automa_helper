@@ -58,6 +58,9 @@ class _PolicyRowState extends State<PolicyRow> {
     BoardState boardState = context.watch<BoardState>();
     const BorderRadius borderRadius = BorderRadius.all(Radius.circular(4.0));
     _selectedSlot = boardState.getItem(widget.info.key);
+    int clsA = boardState.getItem(widget.info.key + "_bill") & 0xf;
+    int clsB = (boardState.getItem(widget.info.key + "_bill") >> 4) & 0xf;
+    int clsC = (boardState.getItem(widget.info.key + "_bill") >> 8) & 0xf;
 
     return Material(
       borderRadius: borderRadius,
@@ -68,6 +71,12 @@ class _PolicyRowState extends State<PolicyRow> {
         Row(children: <Widget>[
           rowDivider,
           Text("A"),
+          (_selectedSlot != 0)
+              ? PolicyBill(
+                  info: widget.info,
+                  cls: clsA,
+                  onTap: () => boardState.togglePolicyBill(widget.info.key, 0))
+              : SizedBox.shrink(),
           Radio<int>(
             fillColor: MaterialStateColor.resolveWith((states) => Colors.black),
             focusColor:
@@ -80,6 +89,12 @@ class _PolicyRowState extends State<PolicyRow> {
           ),
           rowDivider,
           Text("B"),
+          (_selectedSlot != 1)
+              ? PolicyBill(
+                  info: widget.info,
+                  cls: clsB,
+                  onTap: () => boardState.togglePolicyBill(widget.info.key, 1))
+              : SizedBox.shrink(),
           Radio<int>(
             fillColor: MaterialStateColor.resolveWith((states) => Colors.black),
             focusColor:
@@ -92,6 +107,12 @@ class _PolicyRowState extends State<PolicyRow> {
           ),
           rowDivider,
           Text("C"),
+          (_selectedSlot != 2)
+              ? PolicyBill(
+                  info: widget.info,
+                  cls: clsC,
+                  onTap: () => boardState.togglePolicyBill(widget.info.key, 2))
+              : SizedBox.shrink(),
           Radio<int>(
             fillColor: MaterialStateColor.resolveWith((states) => Colors.black),
             focusColor:
@@ -104,6 +125,47 @@ class _PolicyRowState extends State<PolicyRow> {
           ),
         ]),
       ]),
+    );
+  }
+}
+
+class PolicyBill extends StatelessWidget {
+  final PolicyInfo info;
+  final int cls;
+  final VoidCallback onTap;
+
+  const PolicyBill({
+    required this.info,
+    required this.cls,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    Color color = (cls == ClassName.Capitalist.index)
+        ? Colors.blue
+        : (cls == ClassName.Middle.index)
+            ? Colors.yellow
+            : (cls == ClassName.State.index)
+                ? Colors.grey
+                : (cls == ClassName.Worker.index)
+                    ? Colors.red
+                    : Colors.white;
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        width: 20,
+        height: 20,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: color,
+          border: Border.all(
+            color: Colors.white,
+            width: 2,
+          ),
+        ),
+      ),
+      //padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
     );
   }
 }

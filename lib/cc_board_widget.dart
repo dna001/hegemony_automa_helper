@@ -47,6 +47,13 @@ class _CapitalistClassBoardState extends State<CapitalistClassBoardWidget> {
               Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
+                    Icon(Icons.assignment_ind, color: Colors.blue),
+                    rowDivider,
+                    Text(boardState.getItem("cc_bill_markers").toString()),
+                  ]),
+              Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
                     Column(children: <Widget>[
                       Text("REVENUE"),
                       AdjustableValueWidget(

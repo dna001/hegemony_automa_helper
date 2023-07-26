@@ -52,6 +52,10 @@ class _MiddleClassBoardState extends State<MiddleClassBoardWidget> {
                     Icon(Icons.groups, color: Colors.yellow),
                     rowDivider,
                     Text(boardState.getPopulation(ClassName.Middle).toString()),
+                    rowDivider,
+                    Icon(Icons.assignment_ind, color: Colors.yellow),
+                    rowDivider,
+                    Text(boardState.getItem("mc_bill_markers").toString()),
                   ]),
               colDivider,
               Column(children: <Widget>[
