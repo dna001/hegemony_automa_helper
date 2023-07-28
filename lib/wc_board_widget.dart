@@ -48,11 +48,11 @@ class _WorkerClassBoardState extends State<WorkerClassBoardWidget> {
                   children: <Widget>[
                     Icon(Icons.person, color: Colors.red),
                     rowDivider,
-                    Text(boardState.getNumWorkers(ClassName.Worker).toString()),
+                    Text(boardState.workerCount(ClassName.Worker).toString()),
                     rowDivider,
                     Icon(Icons.groups, color: Colors.red),
                     rowDivider,
-                    Text(boardState.getPopulation(ClassName.Worker).toString()),
+                    Text(boardState.population(ClassName.Worker).toString()),
                     rowDivider,
                     Icon(Icons.assignment_ind, color: Colors.red),
                     rowDivider,
@@ -136,34 +136,34 @@ class _WorkerClassBoardState extends State<WorkerClassBoardWidget> {
                     UnionWidget(
                         icon: Icons.agriculture,
                         color: Colors.green,
-                        active: boardState.getUnionState(CompanyType.Food),
+                        active: boardState.unionState(CompanyType.Food),
                         onTap: () => boardState.toggleUnion(CompanyType.Food)),
                     rowDivider,
                     UnionWidget(
                         icon: Icons.smartphone,
                         color: Colors.blue,
-                        active: boardState.getUnionState(CompanyType.Luxury),
+                        active: boardState.unionState(CompanyType.Luxury),
                         onTap: () =>
                             boardState.toggleUnion(CompanyType.Luxury)),
                     rowDivider,
                     UnionWidget(
                         icon: Icons.heart_broken,
                         color: Colors.white,
-                        active: boardState.getUnionState(CompanyType.Health),
+                        active: boardState.unionState(CompanyType.Health),
                         onTap: () =>
                             boardState.toggleUnion(CompanyType.Health)),
                     rowDivider,
                     UnionWidget(
                         icon: Icons.school,
                         color: Colors.orange,
-                        active: boardState.getUnionState(CompanyType.Education),
+                        active: boardState.unionState(CompanyType.Education),
                         onTap: () =>
                             boardState.toggleUnion(CompanyType.Education)),
                     rowDivider,
                     UnionWidget(
                         icon: Icons.chat_bubble,
                         color: Colors.purple,
-                        active: boardState.getUnionState(CompanyType.Media),
+                        active: boardState.unionState(CompanyType.Media),
                         onTap: () => boardState.toggleUnion(CompanyType.Media)),
                   ]),
               colDivider,

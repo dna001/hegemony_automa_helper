@@ -29,7 +29,7 @@ class RoundAndTaxWidget extends StatelessWidget {
                   Text(boardState.getItem("round").toString()),
                   SizedBox(width: 10),
                   Icon(Icons.payments, color: Colors.orange),
-                  Text(boardState.getTaxMultiplier().toString()),
+                  Text(boardState.taxMultiplier().toString()),
                 ]),
           ]),
         ));

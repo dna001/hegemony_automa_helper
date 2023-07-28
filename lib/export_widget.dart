@@ -71,7 +71,7 @@ class ExportWidget extends StatelessWidget {
   Future<void> exportCardListDialogue(
       BuildContext context /*, void Function(int id) onAdd*/) {
     BoardState boardState = context.read<BoardState>();
-    List<ExportCard> exportCardList = boardState.getExportCardList();
+    List<ExportCard> exportCardList = boardState.exportCardList();
 
     return showDialog(
         context: context,

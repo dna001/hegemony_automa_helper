@@ -270,35 +270,21 @@ class PriorityGrid extends StatelessWidget {
   }
 }
 
-class PriorityCard extends StatefulWidget {
+class PriorityCard extends StatelessWidget {
+  final PriorityInfo info;
+  final int priority;
+  final ClassName className;
+
   const PriorityCard(
       {super.key,
       required this.info,
       required this.priority,
       required this.className});
 
-  final PriorityInfo info;
-  final int priority;
-  final ClassName className;
-
-  @override
-  State<PriorityCard> createState() => _PriorityCardState();
-}
-
-class _PriorityCardState extends State<PriorityCard> {
-  late int _priorityValue;
-
-  @override
-  void initState() {
-    super.initState();
-    _priorityValue = 0;
-  }
-
   @override
   Widget build(BuildContext context) {
     const BorderRadius borderRadius = BorderRadius.all(Radius.circular(4.0));
-    final Color color = widget.info.color;
-    final int priority = widget.priority;
+    final Color color = info.color;
     final AutomaState automaState = context.read<AutomaState>();
 
     return Padding(
@@ -319,14 +305,11 @@ class _PriorityCardState extends State<PriorityCard> {
                       RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10.0),
                   ))),
-              onPressed: widget.info.number > 0
-                  ? () =>
-                      automaState.removePolicy(widget.className, widget.info.id)
-                  : () => automaState.decActionPriority(
-                      widget.className, widget.info.id),
-              child: Text(widget.info.number > 0
-                  ? widget.info.number.toString()
-                  : widget.info.shortName),
+              onPressed: info.number > 0
+                  ? () => automaState.removePolicy(className, info.id)
+                  : () => automaState.decActionPriority(className, info.id),
+              child: Text(
+                  info.number > 0 ? info.number.toString() : info.shortName),
             ),
             /*Padding(
               padding: const EdgeInsets.all(4.0),

@@ -47,11 +47,11 @@ class _MiddleClassBoardState extends State<MiddleClassBoardWidget> {
                   children: <Widget>[
                     Icon(Icons.person, color: Colors.yellow),
                     rowDivider,
-                    Text(boardState.getNumWorkers(ClassName.Middle).toString()),
+                    Text(boardState.workerCount(ClassName.Middle).toString()),
                     rowDivider,
                     Icon(Icons.groups, color: Colors.yellow),
                     rowDivider,
-                    Text(boardState.getPopulation(ClassName.Middle).toString()),
+                    Text(boardState.population(ClassName.Middle).toString()),
                     rowDivider,
                     Icon(Icons.assignment_ind, color: Colors.yellow),
                     rowDivider,

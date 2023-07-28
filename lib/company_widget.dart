@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'data/board_state.dart';
@@ -28,8 +27,6 @@ class CompanyWidget extends StatefulWidget {
 }
 
 class _CompanyWidgetState extends State<CompanyWidget> {
-  int? _priceSlot = 1;
-
   @override
   Widget build(BuildContext context) {
     final BoardState boardState = context.watch<BoardState>();
@@ -112,7 +109,7 @@ class _CompanyWidgetState extends State<CompanyWidget> {
       bool isSkilledWorker = (worker != 0 &&
           worker != WorkerType.WcUnskilled.index &&
           worker != WorkerType.McUnskilled.index);
-      ClassName cls = boardState.getWorkerClass(
+      ClassName cls = boardState.workerClass(
           boardState.getItem(bsKeySlot + "_worker" + workerSlot.toString()));
       bool occupied =
           boardState.getItem(bsKeySlot + "_worker" + workerSlot.toString()) > 0;

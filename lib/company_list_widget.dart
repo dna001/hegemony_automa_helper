@@ -47,12 +47,12 @@ class CompanyListWidget extends StatelessWidget {
                     Row(children: <Widget>[
                       Icon(Icons.person, color: Colors.grey),
                       Text(boardState
-                          .getNumWorkersInCompanies(
+                          .workersInCompaniesCount(
                               bsKeyBase, cls, ClassName.Worker)
                           .toString()),
                       Icon(Icons.engineering, color: Colors.grey),
                       Text(boardState
-                          .getNumWorkersInCompanies(
+                          .workersInCompaniesCount(
                               bsKeyBase, cls, ClassName.Middle)
                           .toString()),
                     ]),
@@ -65,7 +65,7 @@ class CompanyListWidget extends StatelessWidget {
                       crossAxisCount: 2,
                       crossAxisSpacing: 2.0,
                       childAspectRatio: 1.0),
-                  itemCount: boardState.getUsedCompanySlots(cls),
+                  itemCount: boardState.usedCompanySlots(cls),
                   itemBuilder: (context, index) => CompanyWidget(
                       info: boardState.getCompanyInfo(boardState
                           .getItem(bsKeyBase + index.toString() + "_id"))!,

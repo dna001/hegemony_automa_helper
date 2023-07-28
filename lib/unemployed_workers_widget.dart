@@ -45,7 +45,7 @@ class UnemployedWorkerRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    BoardState boardState = context.watch<BoardState>();
+    //BoardState boardState = context.watch<BoardState>();
 
     return Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
       WorkerAdjustWidget(

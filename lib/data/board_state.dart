@@ -153,7 +153,7 @@ class BoardState extends ChangeNotifier {
       int slotLimit = 3}) {
     boardData[keyBase + "_id"] = id;
     if (filled) {
-      CompanyInfo? info = getCompanyInfo(id);
+      CompanyInfo? info = companyInfo(id);
       for (int slot = 0; slot < info!.workerSlots.length; slot++)
         if (slot < slotLimit) {
           boardData[keyBase + "_worker" + slot.toString()] =
@@ -174,7 +174,7 @@ class BoardState extends ChangeNotifier {
         addCompanyToSlot(keyBase + slot.toString(), id);
         print("New company $id added in slot $slot");
         if (pay) {
-          CompanyInfo? info = getCompanyInfo(id);
+          CompanyInfo? info = companyInfo(id);
           // Remove money from owner
           if (info!.cls == ClassName.Capitalist) {
             incDecItem("cc_revenue", -info.price);
@@ -195,9 +195,8 @@ class BoardState extends ChangeNotifier {
     String keySlot = keyBase + slot.toString();
     int id = getItem(keySlot + "_id");
     print("Sell company id $id");
-    CompanyInfo? info = getCompanyInfo(id);
-    int usedSlots = getUsedCompanySlots(info!.cls);
-    ;
+    CompanyInfo? info = companyInfo(id);
+    int usedSlots = usedCompanySlots(info!.cls);
     // Add money to owner
     if (info.cls == ClassName.Capitalist) {
       incDecItem("cc_revenue", info.price);
@@ -237,7 +236,7 @@ class BoardState extends ChangeNotifier {
     print("Cycle worker: $companyKeyBase, slot: $workerSlot, company: $id");
     print("worker type: ${getItem(companySlotKey)}");
     int workerType = getItem(companySlotKey);
-    CompanyInfo info = getCompanyInfo(id)!;
+    CompanyInfo info = companyInfo(id)!;
     int newWorkerType = workerType + 1;
     while (workerType != newWorkerType) {
       if (newWorkerType >= WorkerType.AnyUnskilled.index) {
@@ -322,7 +321,7 @@ class BoardState extends ChangeNotifier {
     return "";
   }
 
-  int getTaxMultiplier() {
+  int taxMultiplier() {
     int taxPolicy = getItem("policy_tx");
     int taxBase = 1;
     int wellfareMulti = 0;
@@ -348,14 +347,14 @@ class BoardState extends ChangeNotifier {
     return taxBase;
   }
 
-  int getNumWorkersInCompanies(
+  int workersInCompaniesCount(
       String companyKeyBase, ClassName companyClass, ClassName workerClass,
       {CompanyType typeFilter = CompanyType.Any}) {
     int numWorkers = 0;
     // Check capitalist company slots
-    for (int i = 0; i < getUsedCompanySlots(companyClass); i++) {
+    for (int i = 0; i < usedCompanySlots(companyClass); i++) {
       CompanyInfo info =
-          getCompanyInfo(getItem(companyKeyBase + i.toString() + "_id"))!;
+          companyInfo(getItem(companyKeyBase + i.toString() + "_id"))!;
       if (typeFilter == CompanyType.Any || typeFilter == info.type) {
         for (int workerSlot = 0;
             workerSlot < info.workerSlots.length;
@@ -378,17 +377,17 @@ class BoardState extends ChangeNotifier {
     return numWorkers;
   }
 
-  int getNumWorkers(ClassName cls) {
+  int workerCount(ClassName cls) {
     int numWorkers = 0;
     // Check capitalist company slots
     numWorkers +=
-        getNumWorkersInCompanies("cc_company_slot", ClassName.Capitalist, cls);
+        workersInCompaniesCount("cc_company_slot", ClassName.Capitalist, cls);
     numWorkers +=
-        getNumWorkersInCompanies("mc_company_slot", ClassName.Middle, cls);
+        workersInCompaniesCount("mc_company_slot", ClassName.Middle, cls);
     numWorkers +=
-        getNumWorkersInCompanies("sc_company_slot", ClassName.State, cls);
+        workersInCompaniesCount("sc_company_slot", ClassName.State, cls);
     numWorkers +=
-        getNumWorkersInCompanies("wc_company_slot", ClassName.Worker, cls);
+        workersInCompaniesCount("wc_company_slot", ClassName.Worker, cls);
     if (cls == ClassName.Worker) {
       // Get unemployed workers
       for (int i = WorkerType.WcUnskilled.index;
@@ -398,7 +397,7 @@ class BoardState extends ChangeNotifier {
       }
       // Get union workers
       for (CompanyType type in CompanyType.values) {
-        if (getUnionState(type)) {
+        if (unionState(type)) {
           numWorkers++;
         }
       }
@@ -413,11 +412,11 @@ class BoardState extends ChangeNotifier {
     return numWorkers;
   }
 
-  int getPopulation(ClassName cls) {
-    return (getNumWorkers(cls) / 3).floor();
+  int population(ClassName cls) {
+    return (workerCount(cls) / 3).floor();
   }
 
-  bool getUnionState(CompanyType type) {
+  bool unionState(CompanyType type) {
     int unions = getItem("wc_unions");
     int bit = 1 << type.index;
     return (unions & bit == bit);
@@ -429,16 +428,16 @@ class BoardState extends ChangeNotifier {
     if (unions & bit == bit) {
       unions &= ~bit;
     } else {
-      int numWorkers = getNumWorkersInCompanies(
+      int numWorkers = workersInCompaniesCount(
           "cc_company_slot", ClassName.Capitalist, ClassName.Worker,
           typeFilter: type);
-      numWorkers += getNumWorkersInCompanies(
+      numWorkers += workersInCompaniesCount(
           "mc_company_slot", ClassName.Middle, ClassName.Worker,
           typeFilter: type);
-      numWorkers += getNumWorkersInCompanies(
+      numWorkers += workersInCompaniesCount(
           "sc_company_slot", ClassName.State, ClassName.Worker,
           typeFilter: type);
-      numWorkers += getNumWorkersInCompanies(
+      numWorkers += workersInCompaniesCount(
           "wc_company_slot", ClassName.Worker, ClassName.Worker,
           typeFilter: type);
       if (numWorkers >= 4) {
@@ -532,12 +531,6 @@ class BoardState extends ChangeNotifier {
     }
   }
 
-  void _storeUndoInfo(String key, int value) {
-    Map<String, int> map = {};
-    map[key] = value;
-    undoBoardData.add(map);
-  }
-
   Future<void> undo() async {
     final prefs = await SharedPreferences.getInstance();
     // Undo last action
@@ -551,7 +544,7 @@ class BoardState extends ChangeNotifier {
     notifyListeners();
   }
 
-  int getUsedCompanySlots(ClassName cls) {
+  int usedCompanySlots(ClassName cls) {
     String key = "";
     int maxSlots = 0;
     int usedSlots = 0;
@@ -583,7 +576,7 @@ class BoardState extends ChangeNotifier {
     return usedSlots;
   }
 
-  ClassName getWorkerClass(int workerType) {
+  ClassName workerClass(int workerType) {
     ClassName cls = ClassName.None;
     if (workerType > WorkerType.None.index &&
         workerType < WorkerType.McUnskilled.index) {
@@ -626,7 +619,7 @@ class BoardState extends ChangeNotifier {
     return workerTypeIndex;
   }
 
-  List<CompanyInfo> getCompanyCardList(ClassName cls) {
+  List<CompanyInfo> companyCardList(ClassName cls) {
     List<CompanyInfo> companyInfoList = [];
     for (CompanyInfo info in companyCards) {
       if (info.cls == cls) {
@@ -636,7 +629,7 @@ class BoardState extends ChangeNotifier {
     return companyInfoList;
   }
 
-  CompanyInfo? getCompanyInfo(int id) {
+  CompanyInfo? companyInfo(int id) {
     for (CompanyInfo info in companyCards) {
       if (info.id == id) {
         return info;
@@ -646,7 +639,7 @@ class BoardState extends ChangeNotifier {
     return null;
   }
 
-  List<ExportCard> getExportCardList() {
+  List<ExportCard> exportCardList() {
     return exportCards;
   }
 }
