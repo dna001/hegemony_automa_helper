@@ -13,6 +13,7 @@ import '../unemployed_workers_widget.dart';
 import '../export_widget.dart';
 import '../round_and_tax_widget.dart';
 import '../data/board_state.dart';
+import '../business_deals_widget.dart';
 
 const double mediumWidthBreakpoint = 900;
 const double largeWidthBreakpoint = 1350;
@@ -74,6 +75,10 @@ class _OverviewScreenState extends State<OverviewScreen> {
           child: PolicyWidget(),
         ),
       ),
+      SliverToBoxAdapter(
+          child: Padding(
+              padding: const EdgeInsets.fromLTRB(16.0, 20, 16.0, 0),
+              child: BusinessDealsWidget())),
       SliverToBoxAdapter(
           child: Padding(
               padding: const EdgeInsets.fromLTRB(16.0, 20, 16.0, 0),

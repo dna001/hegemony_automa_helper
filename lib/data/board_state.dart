@@ -642,6 +642,10 @@ class BoardState extends ChangeNotifier {
   List<ExportCard> exportCardList() {
     return exportCards;
   }
+
+  List<BusinessDeal> businessDealList() {
+    return businessDeals;
+  }
 }
 
 class CompanyInfo {
@@ -1365,4 +1369,26 @@ const List<ExportCard> exportCards = <ExportCard>[
       [ExportItem(3, 20), ExportItem(5, 35)],
       [ExportItem(2, 10), ExportItem(6, 35)],
       [ExportItem(4, 25), ExportItem(7, 40)]),
+];
+
+class BusinessDeal {
+  const BusinessDeal(this.id, this.food, this.luxury, this.price, this.tariffs);
+  final int id;
+  final int food;
+  final int luxury;
+  final int price;
+  final List<int> tariffs;
+}
+
+const List<BusinessDeal> businessDeals = <BusinessDeal>[
+  BusinessDeal(1, 0, 8, 30, [16, 8]),
+  BusinessDeal(2, 8, 4, 75, [24, 12]),
+  BusinessDeal(3, 6, 0, 40, [12, 6]),
+  BusinessDeal(4, 7, 0, 50, [14, 7]),
+  BusinessDeal(5, 5, 6, 60, [22, 11]),
+  BusinessDeal(6, 0, 10, 40, [20, 10]),
+  BusinessDeal(7, 8, 0, 55, [16, 8]),
+  BusinessDeal(8, 4, 8, 60, [24, 12]),
+  BusinessDeal(9, 0, 12, 50, [24, 12]),
+  BusinessDeal(10, 7, 5, 70, [24, 12]),
 ];

@@ -67,7 +67,7 @@ class CompanyListWidget extends StatelessWidget {
                       childAspectRatio: 1.0),
                   itemCount: boardState.usedCompanySlots(cls),
                   itemBuilder: (context, index) => CompanyWidget(
-                      info: boardState.getCompanyInfo(boardState
+                      info: boardState.companyInfo(boardState
                           .getItem(bsKeyBase + index.toString() + "_id"))!,
                       bsKeyBase: bsKeyBase,
                       slot: index),
@@ -85,7 +85,7 @@ class CompanyListWidget extends StatelessWidget {
   Future<void> companyListDialogue(
       BuildContext context, void Function(int id) onAdd) {
     BoardState boardState = context.read<BoardState>();
-    List<CompanyInfo> companyInfoList = boardState.getCompanyCardList(cls);
+    List<CompanyInfo> companyInfoList = boardState.companyCardList(cls);
 
     return showDialog(
         context: context,
