@@ -168,8 +168,8 @@ class PolicyButtons extends StatelessWidget {
           child: FilledButton(
             style: ButtonStyle(
                 backgroundColor:
-                    MaterialStateProperty.all(policyPriorityCards[i].color),
-                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                    WidgetStateProperty.all(policyPriorityCards[i].color),
+                shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                     RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10.0),
                 ))),
@@ -207,8 +207,8 @@ class ActionButtons extends StatelessWidget {
           padding: const EdgeInsets.all(4),
           child: FilledButton(
             style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all(classInfo[i].color),
-                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                backgroundColor: WidgetStateProperty.all(classInfo[i].color),
+                shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                     RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10.0),
                 ))),
@@ -300,8 +300,8 @@ class PriorityCard extends StatelessWidget {
             label: Text(priority.toString()),
             child: FilledButton(
               style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.all(color),
-                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                  backgroundColor: WidgetStateProperty.all(color),
+                  shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                       RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10.0),
                   ))),

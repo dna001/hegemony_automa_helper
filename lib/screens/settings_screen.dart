@@ -59,8 +59,8 @@ class _SaveSlotButtonsState extends State<SaveSlotButtons> {
         title: Text(i.toString()),
         leading: */
           Radio<int>(
-        fillColor: MaterialStateColor.resolveWith((states) => Colors.white),
-        focusColor: MaterialStateColor.resolveWith((states) => Colors.white),
+        fillColor: WidgetStateColor.resolveWith((states) => Colors.white),
+        focusColor: WidgetStateColor.resolveWith((states) => Colors.white),
         value: i,
         groupValue: _selectedSlot,
         onChanged: (value) {

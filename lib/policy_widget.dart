@@ -78,9 +78,9 @@ class _PolicyRowState extends State<PolicyRow> {
                   onTap: () => boardState.togglePolicyBill(widget.info.key, 0))
               : SizedBox.shrink(),
           Radio<int>(
-            fillColor: MaterialStateColor.resolveWith((states) => Colors.black),
+            fillColor: WidgetStateColor.resolveWith((states) => Colors.black),
             focusColor:
-                MaterialStateColor.resolveWith((states) => Colors.black),
+                WidgetStateColor.resolveWith((states) => Colors.black),
             value: 0,
             groupValue: _selectedSlot,
             onChanged: (value) {
@@ -96,9 +96,9 @@ class _PolicyRowState extends State<PolicyRow> {
                   onTap: () => boardState.togglePolicyBill(widget.info.key, 1))
               : SizedBox.shrink(),
           Radio<int>(
-            fillColor: MaterialStateColor.resolveWith((states) => Colors.black),
+            fillColor: WidgetStateColor.resolveWith((states) => Colors.black),
             focusColor:
-                MaterialStateColor.resolveWith((states) => Colors.black),
+                WidgetStateColor.resolveWith((states) => Colors.black),
             value: 1,
             groupValue: _selectedSlot,
             onChanged: (value) {
@@ -114,9 +114,9 @@ class _PolicyRowState extends State<PolicyRow> {
                   onTap: () => boardState.togglePolicyBill(widget.info.key, 2))
               : SizedBox.shrink(),
           Radio<int>(
-            fillColor: MaterialStateColor.resolveWith((states) => Colors.black),
+            fillColor: WidgetStateColor.resolveWith((states) => Colors.black),
             focusColor:
-                MaterialStateColor.resolveWith((states) => Colors.black),
+                WidgetStateColor.resolveWith((states) => Colors.black),
             value: 2,
             groupValue: _selectedSlot,
             onChanged: (value) {
