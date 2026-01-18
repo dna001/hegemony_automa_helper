@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../data/board_state.dart';
 
-const rowDivider = SizedBox(width: 60);
-const colDivider = SizedBox(height: 5);
+const rowDivider = SizedBox(width: 50);
+const colDivider = SizedBox(height: 2);
 const double widthConstraint = 450;
 
 class PolicyWidget extends StatelessWidget {

@@ -23,13 +23,25 @@ class ExportWidget extends StatelessWidget {
         ),
         color: Colors.black,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+          padding: const EdgeInsets.fromLTRB(5, 5, 5, 5),
           child: Column(children: <Widget>[
-            Text("EXPORT",
+            Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [Text("EXPORT",
                 style: Theme.of(context)
                     .textTheme
                     .titleMedium!
                     .copyWith(color: Colors.orange)),
+                (id >= 0)
+                ? IconButton(
+                    icon: Icon(Icons.add),
+                    onPressed: () => {
+                          boardState.setItem("export_card_id", id),
+                          Navigator.pop(context)
+                        })
+                : IconButton(
+                    icon: Icon(Icons.list),
+                    onPressed: () => exportCardListDialogue(context)),
+                    ]),
             Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
@@ -37,6 +49,7 @@ class ExportWidget extends StatelessWidget {
                       exportList: exportCards[cardId].foodExportList,
                       iconData: Icons.agriculture,
                       iconColor: Colors.green),
+                  SizedBox(width: 5),
                   ExportGroupWidget(
                       exportList: exportCards[cardId].healthExportList,
                       iconData: Icons.heart_broken,
@@ -49,21 +62,12 @@ class ExportWidget extends StatelessWidget {
                       exportList: exportCards[cardId].luxuryExportList,
                       iconData: Icons.smartphone,
                       iconColor: Colors.blue),
+                  SizedBox(width: 5),
                   ExportGroupWidget(
                       exportList: exportCards[cardId].educationExportList,
                       iconData: Icons.school,
                       iconColor: Colors.orange),
                 ]),
-            (id >= 0)
-                ? IconButton(
-                    icon: Icon(Icons.add),
-                    onPressed: () => {
-                          boardState.setItem("export_card_id", id),
-                          Navigator.pop(context)
-                        })
-                : IconButton(
-                    icon: Icon(Icons.list),
-                    onPressed: () => exportCardListDialogue(context)),
           ]),
         ));
   }

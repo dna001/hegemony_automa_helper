@@ -929,7 +929,7 @@ const List<CompanyInfo> companyCards = <CompanyInfo>[
   CompanyInfo(
       24,
       ClassName.Capitalist,
-      "MEDICAL VILLAGE",
+      "MEDICAL\nVILLAGE",
       CompanyType.Health,
       Colors.red,
       24,
@@ -958,7 +958,7 @@ const List<CompanyInfo> companyCards = <CompanyInfo>[
   CompanyInfo(
       101,
       ClassName.Middle,
-      "CONVENIENCE STORE",
+      "CONVENIENCE\nSTORE",
       CompanyType.Food,
       Colors.green,
       14,
@@ -1028,7 +1028,7 @@ const List<CompanyInfo> companyCards = <CompanyInfo>[
   CompanyInfo(
       106,
       ClassName.Middle,
-      "TUTORING COMPANY",
+      "TUTORING\nCOMPANY",
       CompanyType.Education,
       Colors.orange,
       12,
@@ -1186,7 +1186,7 @@ const List<CompanyInfo> companyCards = <CompanyInfo>[
   CompanyInfo(
       202,
       ClassName.State,
-      "NATIONAL PUBLIC\nBROADCASTING",
+      "NATIONAL PUBL.\nBROADCASTING",
       CompanyType.Media,
       Colors.purple,
       30,

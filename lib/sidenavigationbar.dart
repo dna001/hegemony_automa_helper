@@ -100,11 +100,19 @@ class SideNavbarX extends StatelessWidget {
           },
         ),
         SidebarXItem(
-          icon: Icons.settings,
-          label: 'Settings',
+          icon: Icons.games,
+          label: 'GameBoard',
           onTap: () {
             _controller.selectIndex(4);
             onSelectItem!(4);
+          },
+        ),
+        SidebarXItem(
+          icon: Icons.settings,
+          label: 'Settings',
+          onTap: () {
+            _controller.selectIndex(5);
+            onSelectItem!(5);
           },
         ),
       ],
@@ -123,6 +131,8 @@ String sideNavbarGetTitleByIndex(int index) {
     case 3:
       return 'MC Automa';
     case 4:
+      return 'GameBoard';
+    case 5:
       return 'Settings';
     default:
       return 'Page not found';

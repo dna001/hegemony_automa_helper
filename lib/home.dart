@@ -7,6 +7,7 @@ import 'package:sidebarx/sidebarx.dart';
 
 import '../data/board_state.dart';
 import 'screens/automa_screen.dart';
+import 'screens/gameboard_screen.dart';
 import 'screens/overview_screen.dart';
 import 'screens/settings_screen.dart';
 import 'constants.dart';
@@ -65,6 +66,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       case 3:
         return const AutomaScreen(className: ClassName.Middle);
       case 4:
+        return const GameBoardScreen();
+      case 5:
         return const SettingsScreen();
       default:
         return const Text("Out of screens");
@@ -82,7 +85,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Builder(
       builder: (context) {
-        final isSmallScreen = MediaQuery.of(context).size.width < 500;
+        final isSmallScreen = true; //MediaQuery.of(context).size.width < 500;
         return Scaffold(
           key: _scaffoldKey,
           appBar: isSmallScreen

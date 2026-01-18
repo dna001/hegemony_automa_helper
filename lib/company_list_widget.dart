@@ -17,11 +17,15 @@ class CompanyListWidget extends StatelessWidget {
       required this.title,
       required this.cls,
       required this.borderColor,
-      required this.bsKeyBase});
+      required this.bsKeyBase,
+      this.columns = 4,
+      this.rows = 2});
   final String title;
   final ClassName cls;
   final Color borderColor;
   final String bsKeyBase;
+  final int columns;
+  final int rows;
 
   @override
   Widget build(BuildContext context) {
@@ -59,16 +63,22 @@ class CompanyListWidget extends StatelessWidget {
                   ]),
               colDivider,
               SizedBox(
-                height: 160,
+                height: rows * 100,
                 child: GridView.builder(
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
+                      crossAxisCount: columns,
                       crossAxisSpacing: 2.0,
-                      childAspectRatio: 1.0),
+                      childAspectRatio: 1.1),
                   itemCount: boardState.usedCompanySlots(cls),
                   itemBuilder: (context, index) => CompanyWidget(
                       info: boardState.companyInfo(boardState
                           .getItem(bsKeyBase + index.toString() + "_id"))!,
+                      mode: CompanyViewMode.small,
+                      onTap: () => companyDetailsDialogue(
+                          context,
+                          boardState.companyInfo(boardState
+                              .getItem(bsKeyBase + index.toString() + "_id"))!,
+                          index),
                       bsKeyBase: bsKeyBase,
                       slot: index),
                 ),
@@ -106,6 +116,25 @@ class CompanyListWidget extends StatelessWidget {
                   slot: index),
             ),
           ));
+        });
+  }
+
+  Future<void> companyDetailsDialogue(
+      BuildContext context, CompanyInfo info, int slot) {
+    return showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            content: Container(
+              width: widthConstraint,
+              height: 200,
+              child: CompanyWidget(
+                  info: info,
+                  mode: CompanyViewMode.edit,
+                  bsKeyBase: bsKeyBase,
+                  slot: slot),
+            ),
+          );
         });
   }
 }
