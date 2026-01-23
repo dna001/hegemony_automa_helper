@@ -23,7 +23,7 @@ const colDivider = SizedBox(height: 10);
 const tinySpacing = 3.0;
 const smallSpacing = 10.0;
 const double cardWidth = 115;
-const double widthConstraint = 410;
+const double widthConstraint = 450;
 
 class OverviewScreen extends StatefulWidget {
   const OverviewScreen({super.key});
@@ -94,7 +94,10 @@ class _OverviewScreenState extends State<OverviewScreen> {
                   title: "PUBLIC COMPANIES",
                   cls: ClassName.State,
                   borderColor: Colors.grey,
-                  bsKeyBase: "sc_company_slot"))),
+                  bsKeyBase: "sc_company_slot",
+                  columns: 3,
+                  rows: 3
+      ))),
     ];
   }
 

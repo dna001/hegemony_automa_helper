@@ -166,6 +166,7 @@ class BoardState extends ChangeNotifier {
     }
     boardData[keyBase + "_price"] = getItem("policy_lm");
     boardData[keyBase + "_commited"] = 0;
+    boardData[keyBase + "_extra_production"] = 0;
   }
 
   void addCompanyToFreeSlot(String keyBase, int id, {bool pay = false}) {
@@ -227,6 +228,7 @@ class BoardState extends ChangeNotifier {
       setItem(thisSlot + "_worker2", getItem(nextSlot + "_worker2"));
       setItem(thisSlot + "_price", getItem(nextSlot + "_price"));
       setItem(thisSlot + "_commited", getItem(nextSlot + "_commited"));
+      setItem(thisSlot + "_extra_production", getItem(nextSlot + "_extra_production"));
       setItem(nextSlot + "_id", 0);
     }
   }
@@ -287,6 +289,16 @@ class BoardState extends ChangeNotifier {
     }
     setItem(companySlotKey, newWorkerType);
     print("New worker type: $newWorkerType");
+  }
+
+  void toggleExtraProduction(String companyKeyBase, int id) {
+    String companyExtraProductionKey = companyKeyBase + "_extra_production";
+    CompanyInfo info = companyInfo(id)!;
+    print("Toggle extra production: $companyExtraProductionKey, company: $id");
+    if (info.cls == ClassName.Capitalist) {
+      int state = getItem(companyExtraProductionKey);
+      setItem(companyExtraProductionKey, state == 0 ? 1 : 0);
+    }
   }
 
   String _workerTypeToWorkerKey(int workerType) {

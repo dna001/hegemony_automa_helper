@@ -13,6 +13,9 @@ import '../export_widget.dart';
 import '../round_and_tax_widget.dart';
 import '../data/board_state.dart';
 import '../business_deals_widget.dart';
+import '../cc_board_widget.dart';
+import '../mc_board_widget.dart';
+import '../wc_board_widget.dart';
 
 const tinySpacing = 3.0;
 const smallSpacing = 10.0;
@@ -39,42 +42,53 @@ class _GameBoardScreenState extends State<GameBoardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(children: [
-      Column(children: [
-        SizedBox(width: widthConstraintLeft, child: PolicyWidget()),
-        Row(children: [BusinessDealsWidget(), ExportWidget()]),
-        SizedBox(
-          width: widthConstraintLeft,
-          height: 300,
-          child: CompanyListWidget(
-              title: "CAPITALIST CLASS COMPANIES",
-              cls: ClassName.Capitalist,
-              borderColor: Colors.blue,
-              bsKeyBase: "cc_company_slot"),
-        ),
-        SizedBox(
-          width: widthConstraintLeft,
-          child: CompanyListWidget(
-              title: "MIDDLE CLASS COMPANIES",
-              cls: ClassName.Middle,
-              borderColor: Colors.yellow,
-              bsKeyBase: "mc_company_slot"),
-        )
+    return Column(children: [
+      Row(children: [
+        WorkerClassBoardWidget(small: true),
+        CapitalistClassBoardWidget(small: true),
+        MiddleClassBoardWidget(small: true)
       ]),
-      Column(children: [
-        SizedBox(width: widthConstraintRight, child: RoundAndTaxWidget()),
-        SizedBox(width: widthConstraintRight, child: StateAreaWidget()),
-        SizedBox(
-            width: widthConstraintRight,
+      Row(children: [
+        Column(children: [
+          SizedBox(
+              width: widthConstraintLeft, child: PolicyWidget(small: true)),
+          SizedBox(width: widthConstraintLeft, child: Row(children: [BusinessDealsWidget(), Expanded(child: ExportWidget())])),
+          SizedBox(
+            width: widthConstraintLeft,
             child: CompanyListWidget(
-                title: "PUBLIC COMPANIES",
-                cls: ClassName.State,
-                borderColor: Colors.grey,
-                bsKeyBase: "sc_company_slot",
-                columns: 3,
-                rows: 3)),
-        SizedBox(width: widthConstraintRight, child: UnemployedWorkersWidget())
-      ]),
+                title: "CAPITALIST CLASS COMPANIES",
+                cls: ClassName.Capitalist,
+                borderColor: Colors.blue,
+                bsKeyBase: "cc_company_slot",
+                columns: 4,
+                rows: 3),
+          ),
+          SizedBox(
+              width: widthConstraintLeft,
+              child: CompanyListWidget(
+                  title: "MIDDLE CLASS COMPANIES",
+                  cls: ClassName.Middle,
+                  borderColor: Colors.yellow,
+                  bsKeyBase: "mc_company_slot",
+                  columns: 4,
+                  rows: 2))
+        ]),
+        Column(children: [
+          SizedBox(width: widthConstraintRight, child: RoundAndTaxWidget()),
+          SizedBox(width: widthConstraintRight, child: StateAreaWidget()),
+          SizedBox(
+              width: widthConstraintRight,
+              child: CompanyListWidget(
+                  title: "PUBLIC COMPANIES",
+                  cls: ClassName.State,
+                  borderColor: Colors.grey,
+                  bsKeyBase: "sc_company_slot",
+                  columns: 3,
+                  rows: 3)),
+          SizedBox(
+              width: widthConstraintRight, child: UnemployedWorkersWidget())
+        ]),
+      ])
     ]);
     //return CustomRenderBoxWidget();
     //final automaState automaState = context.watch<automaState>();

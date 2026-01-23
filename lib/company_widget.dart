@@ -15,12 +15,14 @@ class CompanyWidget extends StatefulWidget {
       this.mode = CompanyViewMode.small,
       this.onAdd,
       this.onTap,
+      this.onSell,
       required this.bsKeyBase,
       required this.slot});
   final CompanyInfo info;
   final CompanyViewMode mode;
   final VoidCallback? onAdd;
   final VoidCallback? onTap;
+  final VoidCallback? onSell;
   final String bsKeyBase;
   final int slot;
 
@@ -118,9 +120,24 @@ class _CompanyWidgetState extends State<CompanyWidget> {
 
     if (widget.mode == CompanyViewMode.small) {
       // Show total production
+      int totalProduction = widget.info.production;
+      if (widget.info.productionExtra > 0) {
+        if (widget.info.cls == ClassName.Middle) {
+          // Check if worker class spot is occupied
+          if (boardState.getItem(bsKeySlot + "_worker1") > 0) {
+            totalProduction += widget.info.productionExtra;
+          }
+        } else {
+          // Capitalist
+          if (boardState.getItem(bsKeySlot + "_extra_production") > 0) {
+            totalProduction += widget.info.productionExtra;
+          }
+        }
+      }
+
       productionRow =
           Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
-        Text(widget.info.production.toString(), style: TextStyle(fontSize: 12)),
+        Text(totalProduction.toString(), style: TextStyle(fontSize: 12)),
         Icon(widget.info.productionIcon, color: widget.info.color, size: 15),
       ]);
     } else {
@@ -132,7 +149,15 @@ class _CompanyWidgetState extends State<CompanyWidget> {
         (widget.info.productionExtra > 0)
             ? (widget.info.cls == ClassName.Middle)
                 ? Icon(Icons.person, color: Colors.grey)
-                : Icon(Icons.settings)
+                : IconButton(
+                    onPressed: () => boardState.toggleExtraProduction(
+                        bsKeySlot, widget.info.id),
+                    icon: Icon(Icons.settings,
+                        color: boardState
+                                    .getItem(bsKeySlot + "_extra_production") >
+                                0
+                            ? Colors.white
+                            : Colors.grey))
             : SizedBox(width: 1),
         (widget.info.productionExtra > 0)
             ? Text(": +" + widget.info.productionExtra.toString())
@@ -204,8 +229,10 @@ class _CompanyWidgetState extends State<CompanyWidget> {
           (widget.mode == CompanyViewMode.edit)
               ? IconButton(
                   icon: Icon(Icons.monetization_on),
-                  onPressed: () =>
-                      boardState.sellCompany(widget.bsKeyBase, widget.slot))
+                  onPressed: () {
+                    boardState.sellCompany(widget.bsKeyBase, widget.slot);
+                    widget.onSell?.call();
+                  })
               : SizedBox(width: 10),
         ]),
       ]),

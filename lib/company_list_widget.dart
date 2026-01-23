@@ -63,12 +63,12 @@ class CompanyListWidget extends StatelessWidget {
                   ]),
               colDivider,
               SizedBox(
-                height: rows * 100,
+                height: rows * 110,
                 child: GridView.builder(
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: columns,
                       crossAxisSpacing: 2.0,
-                      childAspectRatio: 1.1),
+                      childAspectRatio: 1.0),
                   itemCount: boardState.usedCompanySlots(cls),
                   itemBuilder: (context, index) => CompanyWidget(
                       info: boardState.companyInfo(boardState
@@ -131,6 +131,7 @@ class CompanyListWidget extends StatelessWidget {
               child: CompanyWidget(
                   info: info,
                   mode: CompanyViewMode.edit,
+                  onSell: () => Navigator.pop(context),
                   bsKeyBase: bsKeyBase,
                   slot: slot),
             ),

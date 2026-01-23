@@ -7,18 +7,25 @@ import 'package:provider/provider.dart';
 import 'data/board_state.dart';
 
 class VictoryPoints extends StatelessWidget {
-  const VictoryPoints({super.key, required this.vpKey, required this.color});
+  const VictoryPoints(
+      {super.key,
+      required this.vpKey,
+      required this.color,
+      this.canModify = true});
   final String vpKey;
   final Color color;
+  final bool canModify;
 
   @override
   Widget build(BuildContext context) {
     BoardState boardState = context.watch<BoardState>();
 
     return Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
-      IconButton(
-          icon: Icon(Icons.remove),
-          onPressed: () => boardState.incDecItem(vpKey, -1)),
+      canModify
+          ? IconButton(
+              icon: Icon(Icons.remove),
+              onPressed: () => boardState.incDecItem(vpKey, -1))
+          : SizedBox(),
       Stack(alignment: Alignment.center, children: <Widget>[
         Icon(Icons.star_rounded, color: Colors.grey, size: 50),
         Text(boardState.getItem(vpKey).toString(),
@@ -27,9 +34,11 @@ class VictoryPoints extends StatelessWidget {
                 fontWeight: FontWeight.bold,
                 fontSize: 12)),
       ]),
-      IconButton(
-          icon: Icon(Icons.add),
-          onPressed: () => boardState.incDecItem(vpKey, 1)),
+      canModify
+          ? IconButton(
+              icon: Icon(Icons.add),
+              onPressed: () => boardState.incDecItem(vpKey, 1))
+          : SizedBox(),
     ]);
   }
 }

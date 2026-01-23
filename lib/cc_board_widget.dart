@@ -14,7 +14,8 @@ const colDivider = SizedBox(height: 5);
 const double widthConstraint = 450;
 
 class CapitalistClassBoardWidget extends StatefulWidget {
-  CapitalistClassBoardWidget();
+  CapitalistClassBoardWidget({this.small = false});
+  final bool small;
 
   @override
   State<CapitalistClassBoardWidget> createState() =>
@@ -24,10 +25,145 @@ class CapitalistClassBoardWidget extends StatefulWidget {
 class _CapitalistClassBoardState extends State<CapitalistClassBoardWidget> {
   int? _wealth = 0;
 
+  Future<void> _detailsDialogue(BuildContext context) {
+    return showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            content: Container(
+                width: widthConstraint,
+                height: 600,
+                child: CapitalistClassBoardWidget()),
+          );
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
     BoardState boardState = context.watch<BoardState>();
+    Widget ccWidget = SizedBox();
 
+    if (widget.small) {
+      ccWidget = SizedBox(
+          width: 200,
+          height: 100,
+          child: InkWell(
+              onTap: () =>_detailsDialogue(context),
+              child: Column(
+                children: [
+                  Text("CAPITALIST CLASS",
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleMedium!
+                          .copyWith(color: Colors.orange)),
+                  Row(children: [
+                    VictoryPoints(
+                        vpKey: "cc_vp", color: Colors.red, canModify: false),
+                    SizedBox(
+                        height: 40,
+                        width: 40,
+                        child: WealthRadioListTile<int>(
+                          value: _wealth ?? 0,
+                          groupValue: _wealth ?? 0,
+                          onChanged: (value) {},
+                        ))
+                  ]),
+                  Row(children: [
+                    Icon(Icons.lock, color: Colors.blue),
+                    rowDivider,
+                    Text(boardState.getItem("cc_capital").toString() + "£",
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium!
+                            .copyWith(color: Colors.orange)),
+                    rowDivider,
+                    Icon(Icons.money, color: Colors.blue),
+                    rowDivider,
+                    Text(boardState.getItem("cc_revenue").toString() + "£",
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium!
+                            .copyWith(color: Colors.orange)),
+                  ]),
+                ],
+              )));
+    } else {
+      ccWidget = Column(children: <Widget>[
+        Text("CAPITALIST CLASS",
+            style: Theme.of(context)
+                .textTheme
+                .titleMedium!
+                .copyWith(color: Colors.orange)),
+        colDivider,
+        VictoryPoints(vpKey: "cc_vp", color: Colors.red),
+        Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
+          Icon(Icons.assignment_ind, color: Colors.blue),
+          rowDivider,
+          Text(boardState.getItem("cc_bill_markers").toString()),
+        ]),
+        Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
+          Column(children: <Widget>[
+            Text("REVENUE"),
+            AdjustableValueWidget(valueKey: "cc_revenue", showBorder: true),
+          ]),
+          Column(children: <Widget>[
+            Text("CAPITAL"),
+            AdjustableValueWidget(valueKey: "cc_capital", showBorder: true),
+          ]),
+        ]),
+        Text("WEALTH"),
+        colDivider,
+        SizedBox(
+            height: 100,
+            child: GridView.builder(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 9, crossAxisSpacing: 2.0),
+              itemCount: 16,
+              itemBuilder: (context, index) => WealthRadioListTile<int>(
+                value: index,
+                groupValue: _wealth ?? 0,
+                onChanged: (value) {
+                  setState(() {
+                    _wealth = value;
+                  });
+                },
+              ),
+            )),
+        Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
+          StorageArea(
+            bsKey: "cc_storage_food",
+            icon: Icons.agriculture,
+            iconColor: Colors.green,
+            price: 12,
+          ),
+          StorageArea(
+            bsKey: "cc_storage_luxury",
+            icon: Icons.smartphone,
+            iconColor: Colors.blue,
+            price: 8,
+          ),
+          StorageArea(
+            bsKey: "cc_storage_health",
+            icon: Icons.heart_broken,
+            iconColor: Colors.red,
+            price: 8,
+          ),
+          StorageArea(
+            bsKey: "cc_storage_education",
+            icon: Icons.school,
+            iconColor: Colors.orange,
+            price: 8,
+          ),
+          VerticalDividerCustom(),
+          StorageArea(
+            bsKey: "cc_influence",
+            icon: Icons.chat_bubble,
+            iconColor: Colors.purple,
+            price: 0,
+          ),
+        ]),
+      ]);
+    }
     return Material(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
@@ -35,90 +171,7 @@ class _CapitalistClassBoardState extends State<CapitalistClassBoardWidget> {
         ),
         color: Colors.black,
         child: Padding(
-            padding: const EdgeInsets.fromLTRB(6, 0, 6, 0),
-            child: Column(children: <Widget>[
-              Text("CAPITALIST CLASS",
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleMedium!
-                      .copyWith(color: Colors.orange)),
-              colDivider,
-              VictoryPoints(vpKey: "cc_vp", color: Colors.red),
-              Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Icon(Icons.assignment_ind, color: Colors.blue),
-                    rowDivider,
-                    Text(boardState.getItem("cc_bill_markers").toString()),
-                  ]),
-              Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Column(children: <Widget>[
-                      Text("REVENUE"),
-                      AdjustableValueWidget(
-                          valueKey: "cc_revenue", showBorder: true),
-                    ]),
-                    Column(children: <Widget>[
-                      Text("CAPITAL"),
-                      AdjustableValueWidget(
-                          valueKey: "cc_capital", showBorder: true),
-                    ]),
-                  ]),
-              Text("WEALTH"),
-              colDivider,
-              SizedBox(
-                  height: 80,
-                  child: GridView.builder(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 9, crossAxisSpacing: 2.0),
-                    itemCount: 16,
-                    itemBuilder: (context, index) => WealthRadioListTile<int>(
-                      value: index,
-                      groupValue: _wealth ?? 0,
-                      onChanged: (value) {
-                        setState(() {
-                          _wealth = value;
-                        });
-                      },
-                    ),
-                  )),
-              Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    StorageArea(
-                      bsKey: "cc_storage_food",
-                      icon: Icons.agriculture,
-                      iconColor: Colors.green,
-                      price: 12,
-                    ),
-                    StorageArea(
-                      bsKey: "cc_storage_luxury",
-                      icon: Icons.smartphone,
-                      iconColor: Colors.blue,
-                      price: 8,
-                    ),
-                    StorageArea(
-                      bsKey: "cc_storage_health",
-                      icon: Icons.heart_broken,
-                      iconColor: Colors.red,
-                      price: 8,
-                    ),
-                    StorageArea(
-                      bsKey: "cc_storage_education",
-                      icon: Icons.school,
-                      iconColor: Colors.orange,
-                      price: 8,
-                    ),
-                    VerticalDividerCustom(),
-                    StorageArea(
-                      bsKey: "cc_influence",
-                      icon: Icons.chat_bubble,
-                      iconColor: Colors.purple,
-                      price: 0,
-                    ),
-                  ]),
-            ])));
+            padding: const EdgeInsets.fromLTRB(6, 6, 6, 6), child: ccWidget));
   }
 }
 
@@ -135,14 +188,7 @@ class WealthRadioListTile<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () => onChanged(value),
-      child: Container(
-        height: 20,
-        //padding: EdgeInsets.symmetric(horizontal: 16),
-        child: _customRadioButton,
-      ),
-    );
+    return InkWell(onTap: () => onChanged(value), child: _customRadioButton);
   }
 
   Widget get _customRadioButton {
@@ -157,14 +203,13 @@ class WealthRadioListTile<T> extends StatelessWidget {
           width: 2,
         ),
       ),
-      child: Stack(children: <Widget>[
+      child: Stack(alignment: AlignmentGeometry.center, children: <Widget>[
         Icon(Icons.star_rounded, color: Colors.grey, size: 35),
-        Center(
-            child: Text(this.value.toString(),
-                style: TextStyle(
-                    color: isSelected ? Colors.white : Colors.black,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15))),
+        Text(this.value.toString(),
+            style: TextStyle(
+                color: isSelected ? Colors.white : Colors.black,
+                fontWeight: FontWeight.bold,
+                fontSize: 15)),
       ]),
     );
   }

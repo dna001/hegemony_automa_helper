@@ -14,7 +14,8 @@ const colDivider = SizedBox(height: 5);
 const double widthConstraint = 450;
 
 class WorkerClassBoardWidget extends StatefulWidget {
-  WorkerClassBoardWidget();
+  WorkerClassBoardWidget({this.small = false});
+  final bool small;
 
   @override
   State<WorkerClassBoardWidget> createState() => _WorkerClassBoardState();
@@ -23,29 +24,48 @@ class WorkerClassBoardWidget extends StatefulWidget {
 class _WorkerClassBoardState extends State<WorkerClassBoardWidget> {
   int? _prosperity = 0;
 
+  Future<void> _detailsDialogue(BuildContext context) {
+    return showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            content: Container(
+                width: widthConstraint,
+                height: 600,
+                child: WorkerClassBoardWidget()),
+          );
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
     BoardState boardState = context.watch<BoardState>();
     _prosperity = boardState.getItem("wc_prosperity");
+    Widget wcWidget = SizedBox();
 
-    return Material(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-          side: const BorderSide(color: Colors.red, width: 2),
-        ),
-        color: Colors.black,
-        child: Padding(
-            padding: const EdgeInsets.fromLTRB(6, 6, 6, 6),
-            child: Column(children: <Widget>[
-              Text("WORKER CLASS",
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleMedium!
-                      .copyWith(color: Colors.orange)),
-              VictoryPoints(vpKey: "wc_vp", color: Colors.red),
-              Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
+    if (widget.small) {
+      wcWidget = SizedBox(
+          width: 200,
+          height: 100,
+          child: InkWell(
+              onTap: () => _detailsDialogue(context),
+              child: Column(
+                children: [
+                  Text("WORKER CLASS",
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleMedium!
+                          .copyWith(color: Colors.orange)),
+                  Row(children: [
+                    VictoryPoints(
+                        vpKey: "wc_vp", color: Colors.red, canModify: false),
+                    SizedBox(
+                        height: 40,
+                        child: ProsperityRadioListTile<int>(
+                          value: _prosperity ?? 0,
+                          groupValue: _prosperity ?? 0,
+                          onChanged: (value) {},
+                        )),
                     Icon(Icons.person, color: Colors.red),
                     rowDivider,
                     Text(boardState.workerCount(ClassName.Worker).toString()),
@@ -53,121 +73,150 @@ class _WorkerClassBoardState extends State<WorkerClassBoardWidget> {
                     Icon(Icons.groups, color: Colors.red),
                     rowDivider,
                     Text(boardState.population(ClassName.Worker).toString()),
-                    rowDivider,
                     Icon(Icons.assignment_ind, color: Colors.red),
                     rowDivider,
                     Text(boardState.getItem("wc_bill_markers").toString()),
                   ]),
-              colDivider,
-              Column(children: <Widget>[
-                Text("INCOME"),
-                AdjustableValueWidget(valueKey: "wc_income", showBorder: true),
-              ]),
-              colDivider,
-              Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text("PROSPERITY"),
+                  Row(children: [
+                    Icon(Icons.money, color: Colors.red),
                     rowDivider,
-                    Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.red,
-                      ),
-                      child:
-                          Icon(Icons.sentiment_satisfied, color: Colors.black),
-                    ),
+                    Text(boardState.getItem("wc_income").toString() + "£",
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium!
+                            .copyWith(color: Colors.orange)),
                   ]),
-              colDivider,
-              SizedBox(
-                  height: 35,
-                  child: GridView.builder(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 11, crossAxisSpacing: 2.0),
-                    itemCount: 11,
-                    itemBuilder: (context, index) =>
-                        ProsperityRadioListTile<int>(
-                      value: index,
-                      groupValue: _prosperity ?? 0,
-                      onChanged: (value) {
-                        _prosperity = value;
-                        boardState.setItem("wc_prosperity", value ?? 0);
-                      },
-                    ),
-                  )),
-              Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    StorageArea(
-                      bsKey: "wc_food",
-                      icon: Icons.agriculture,
-                      iconColor: Colors.green,
-                      price: 0,
-                    ),
-                    StorageArea(
-                      bsKey: "wc_luxury",
-                      icon: Icons.smartphone,
-                      iconColor: Colors.blue,
-                      price: 0,
-                    ),
-                    StorageArea(
-                      bsKey: "wc_health",
-                      icon: Icons.heart_broken,
-                      iconColor: Colors.red,
-                      price: 0,
-                    ),
-                    StorageArea(
-                      bsKey: "wc_education",
-                      icon: Icons.school,
-                      iconColor: Colors.orange,
-                      price: 0,
-                    ),
-                    StorageArea(
-                      bsKey: "wc_influence",
-                      icon: Icons.chat_bubble,
-                      iconColor: Colors.purple,
-                      price: 0,
-                    ),
-                  ]),
-              Text("LABOUR UNIONS"),
-              Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    UnionWidget(
-                        icon: Icons.agriculture,
-                        color: Colors.green,
-                        active: boardState.unionState(CompanyType.Food),
-                        onTap: () => boardState.toggleUnion(CompanyType.Food)),
-                    rowDivider,
-                    UnionWidget(
-                        icon: Icons.smartphone,
-                        color: Colors.blue,
-                        active: boardState.unionState(CompanyType.Luxury),
-                        onTap: () =>
-                            boardState.toggleUnion(CompanyType.Luxury)),
-                    rowDivider,
-                    UnionWidget(
-                        icon: Icons.heart_broken,
-                        color: Colors.white,
-                        active: boardState.unionState(CompanyType.Health),
-                        onTap: () =>
-                            boardState.toggleUnion(CompanyType.Health)),
-                    rowDivider,
-                    UnionWidget(
-                        icon: Icons.school,
-                        color: Colors.orange,
-                        active: boardState.unionState(CompanyType.Education),
-                        onTap: () =>
-                            boardState.toggleUnion(CompanyType.Education)),
-                    rowDivider,
-                    UnionWidget(
-                        icon: Icons.chat_bubble,
-                        color: Colors.purple,
-                        active: boardState.unionState(CompanyType.Media),
-                        onTap: () => boardState.toggleUnion(CompanyType.Media)),
-                  ]),
-              colDivider,
-            ])));
+                ],
+              )));
+    } else {
+      wcWidget = Column(children: <Widget>[
+        Text("WORKER CLASS",
+            style: Theme.of(context)
+                .textTheme
+                .titleMedium!
+                .copyWith(color: Colors.orange)),
+        VictoryPoints(vpKey: "wc_vp", color: Colors.red),
+        Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
+          Icon(Icons.person, color: Colors.red),
+          rowDivider,
+          Text(boardState.workerCount(ClassName.Worker).toString()),
+          rowDivider,
+          Icon(Icons.groups, color: Colors.red),
+          rowDivider,
+          Text(boardState.population(ClassName.Worker).toString()),
+          rowDivider,
+          Icon(Icons.assignment_ind, color: Colors.red),
+          rowDivider,
+          Text(boardState.getItem("wc_bill_markers").toString()),
+        ]),
+        colDivider,
+        Column(children: <Widget>[
+          Text("INCOME"),
+          AdjustableValueWidget(valueKey: "wc_income", showBorder: true),
+        ]),
+        colDivider,
+        Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
+          Text("PROSPERITY"),
+          rowDivider,
+          Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.red,
+            ),
+            child: Icon(Icons.sentiment_satisfied, color: Colors.black),
+          ),
+        ]),
+        colDivider,
+        SizedBox(
+            height: 40,
+            child: GridView.builder(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 11, crossAxisSpacing: 2.0),
+              itemCount: 11,
+              itemBuilder: (context, index) => ProsperityRadioListTile<int>(
+                value: index,
+                groupValue: _prosperity ?? 0,
+                onChanged: (value) {
+                  _prosperity = value;
+                  boardState.setItem("wc_prosperity", value ?? 0);
+                },
+              ),
+            )),
+        Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
+          StorageArea(
+            bsKey: "wc_food",
+            icon: Icons.agriculture,
+            iconColor: Colors.green,
+            price: 0,
+          ),
+          StorageArea(
+            bsKey: "wc_luxury",
+            icon: Icons.smartphone,
+            iconColor: Colors.blue,
+            price: 0,
+          ),
+          StorageArea(
+            bsKey: "wc_health",
+            icon: Icons.heart_broken,
+            iconColor: Colors.red,
+            price: 0,
+          ),
+          StorageArea(
+            bsKey: "wc_education",
+            icon: Icons.school,
+            iconColor: Colors.orange,
+            price: 0,
+          ),
+          StorageArea(
+            bsKey: "wc_influence",
+            icon: Icons.chat_bubble,
+            iconColor: Colors.purple,
+            price: 0,
+          ),
+        ]),
+        Text("LABOUR UNIONS"),
+        Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
+          UnionWidget(
+              icon: Icons.agriculture,
+              color: Colors.green,
+              active: boardState.unionState(CompanyType.Food),
+              onTap: () => boardState.toggleUnion(CompanyType.Food)),
+          rowDivider,
+          UnionWidget(
+              icon: Icons.smartphone,
+              color: Colors.blue,
+              active: boardState.unionState(CompanyType.Luxury),
+              onTap: () => boardState.toggleUnion(CompanyType.Luxury)),
+          rowDivider,
+          UnionWidget(
+              icon: Icons.heart_broken,
+              color: Colors.white,
+              active: boardState.unionState(CompanyType.Health),
+              onTap: () => boardState.toggleUnion(CompanyType.Health)),
+          rowDivider,
+          UnionWidget(
+              icon: Icons.school,
+              color: Colors.orange,
+              active: boardState.unionState(CompanyType.Education),
+              onTap: () => boardState.toggleUnion(CompanyType.Education)),
+          rowDivider,
+          UnionWidget(
+              icon: Icons.chat_bubble,
+              color: Colors.purple,
+              active: boardState.unionState(CompanyType.Media),
+              onTap: () => boardState.toggleUnion(CompanyType.Media)),
+        ]),
+        colDivider,
+      ]);
+    }
+    return Material(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+          side: const BorderSide(color: Colors.red, width: 2),
+        ),
+        color: Colors.black,
+        child: Padding(
+            padding: const EdgeInsets.fromLTRB(6, 6, 6, 6), child: wcWidget));
   }
 }
 

@@ -11,7 +11,8 @@ const colDivider = SizedBox(height: 2);
 const double widthConstraint = 450;
 
 class PolicyWidget extends StatelessWidget {
-  const PolicyWidget({super.key});
+  const PolicyWidget({super.key, this.small = false});
+  final bool small;
 
   @override
   Widget build(BuildContext context) {
@@ -24,27 +25,28 @@ class PolicyWidget extends StatelessWidget {
         child: Padding(
             padding: const EdgeInsets.fromLTRB(6, 6, 6, 6),
             child: Column(children: <Widget>[
-              PolicyRow(info: policyCards[0]),
+              PolicyRow(info: policyCards[0], small: small),
               colDivider,
-              PolicyRow(info: policyCards[1]),
+              PolicyRow(info: policyCards[1], small: small),
               colDivider,
-              PolicyRow(info: policyCards[2]),
+              PolicyRow(info: policyCards[2], small: small),
               colDivider,
-              PolicyRow(info: policyCards[3]),
+              PolicyRow(info: policyCards[3], small: small),
               colDivider,
-              PolicyRow(info: policyCards[4]),
+              PolicyRow(info: policyCards[4], small: small),
               colDivider,
-              PolicyRow(info: policyCards[5]),
+              PolicyRow(info: policyCards[5], small: small),
               colDivider,
-              PolicyRow(info: policyCards[6]),
+              PolicyRow(info: policyCards[6], small: small),
             ])));
   }
 }
 
 class PolicyRow extends StatefulWidget {
-  const PolicyRow({super.key, required this.info});
+  const PolicyRow({super.key, required this.info, this.small = false});
 
   final PolicyInfo info;
+  final bool small;
 
   @override
   State<PolicyRow> createState() => _PolicyRowState();
@@ -61,71 +63,103 @@ class _PolicyRowState extends State<PolicyRow> {
     int clsA = boardState.getItem(widget.info.key + "_bill") & 0xf;
     int clsB = (boardState.getItem(widget.info.key + "_bill") >> 4) & 0xf;
     int clsC = (boardState.getItem(widget.info.key + "_bill") >> 8) & 0xf;
+    Widget policyWidget = SizedBox();
+    if (widget.small) {
+      policyWidget = RadioGroup<int>(
+          groupValue: _selectedSlot,
+          onChanged: (value) {},
+          child: Row(children: [
+            rowDivider,
+            Text("A"),
+            Radio<int>(
+                fillColor:
+                    WidgetStateColor.resolveWith((states) => Colors.black),
+                focusColor:
+                    WidgetStateColor.resolveWith((states) => Colors.black),
+                value: 0),
+            rowDivider,
+            Text("B"),
+            Radio<int>(
+                fillColor:
+                    WidgetStateColor.resolveWith((states) => Colors.black),
+                focusColor:
+                    WidgetStateColor.resolveWith((states) => Colors.black),
+                value: 1),
+            rowDivider,
+            Text("C"),
+            Radio<int>(
+                fillColor:
+                    WidgetStateColor.resolveWith((states) => Colors.black),
+                focusColor:
+                    WidgetStateColor.resolveWith((states) => Colors.black),
+                value: 2)
+          ]));
+    } else {
+      policyWidget = Column(children: <Widget>[
+        Text(widget.info.name),
+        RadioGroup<int>(
+            groupValue: _selectedSlot,
+            onChanged: (value) {
+              boardState.setItem(widget.info.key, value ?? 0);
+            },
+            child: Row(children: <Widget>[
+              rowDivider,
+              Text("A"),
+              (_selectedSlot != 0)
+                  ? PolicyBill(
+                      info: widget.info,
+                      cls: clsA,
+                      onTap: () =>
+                          boardState.togglePolicyBill(widget.info.key, 0))
+                  : SizedBox.shrink(),
+              Radio<int>(
+                fillColor:
+                    WidgetStateColor.resolveWith((states) => Colors.black),
+                focusColor:
+                    WidgetStateColor.resolveWith((states) => Colors.black),
+                value: 0,
+              ),
+              rowDivider,
+              Text("B"),
+              (_selectedSlot != 1)
+                  ? PolicyBill(
+                      info: widget.info,
+                      cls: clsB,
+                      onTap: () =>
+                          boardState.togglePolicyBill(widget.info.key, 1))
+                  : SizedBox.shrink(),
+              Radio<int>(
+                fillColor:
+                    WidgetStateColor.resolveWith((states) => Colors.black),
+                focusColor:
+                    WidgetStateColor.resolveWith((states) => Colors.black),
+                value: 1,
+              ),
+              rowDivider,
+              Text("C"),
+              (_selectedSlot != 2)
+                  ? PolicyBill(
+                      info: widget.info,
+                      cls: clsC,
+                      onTap: () =>
+                          boardState.togglePolicyBill(widget.info.key, 2))
+                  : SizedBox.shrink(),
+              Radio<int>(
+                fillColor:
+                    WidgetStateColor.resolveWith((states) => Colors.black),
+                focusColor:
+                    WidgetStateColor.resolveWith((states) => Colors.black),
+                value: 2,
+              ),
+            ])),
+      ]);
+    }
 
     return Material(
-      borderRadius: borderRadius,
-      color: widget.info.color,
-      type: MaterialType.card,
-      child: Column(children: <Widget>[
-        Text(widget.info.name),
-        Row(children: <Widget>[
-          rowDivider,
-          Text("A"),
-          (_selectedSlot != 0)
-              ? PolicyBill(
-                  info: widget.info,
-                  cls: clsA,
-                  onTap: () => boardState.togglePolicyBill(widget.info.key, 0))
-              : SizedBox.shrink(),
-          Radio<int>(
-            fillColor: WidgetStateColor.resolveWith((states) => Colors.black),
-            focusColor:
-                WidgetStateColor.resolveWith((states) => Colors.black),
-            value: 0,
-            groupValue: _selectedSlot,
-            onChanged: (value) {
-              boardState.setItem(widget.info.key, value ?? 0);
-            },
-          ),
-          rowDivider,
-          Text("B"),
-          (_selectedSlot != 1)
-              ? PolicyBill(
-                  info: widget.info,
-                  cls: clsB,
-                  onTap: () => boardState.togglePolicyBill(widget.info.key, 1))
-              : SizedBox.shrink(),
-          Radio<int>(
-            fillColor: WidgetStateColor.resolveWith((states) => Colors.black),
-            focusColor:
-                WidgetStateColor.resolveWith((states) => Colors.black),
-            value: 1,
-            groupValue: _selectedSlot,
-            onChanged: (value) {
-              boardState.setItem(widget.info.key, value ?? 0);
-            },
-          ),
-          rowDivider,
-          Text("C"),
-          (_selectedSlot != 2)
-              ? PolicyBill(
-                  info: widget.info,
-                  cls: clsC,
-                  onTap: () => boardState.togglePolicyBill(widget.info.key, 2))
-              : SizedBox.shrink(),
-          Radio<int>(
-            fillColor: WidgetStateColor.resolveWith((states) => Colors.black),
-            focusColor:
-                WidgetStateColor.resolveWith((states) => Colors.black),
-            value: 2,
-            groupValue: _selectedSlot,
-            onChanged: (value) {
-              boardState.setItem(widget.info.key, value ?? 0);
-            },
-          ),
-        ]),
-      ]),
-    );
+        borderRadius: borderRadius,
+        color: widget.info.color,
+        type: MaterialType.card,
+        child: policyWidget);
   }
 }
 
