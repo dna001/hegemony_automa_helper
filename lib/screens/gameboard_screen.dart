@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart';
+import 'package:provider/provider.dart';
+import '../game_setup_widget.dart';
 import '../policy_widget.dart';
 import '../company_list_widget.dart';
 import '../state_area_widget.dart';
@@ -31,6 +31,8 @@ class GameBoardScreen extends StatefulWidget {
 }
 
 class _GameBoardScreenState extends State<GameBoardScreen> {
+  bool gameStateSetup = true;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -42,11 +44,13 @@ class _GameBoardScreenState extends State<GameBoardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(children: [
+    BoardState boardState = context.watch<BoardState>();
+    
+    return boardState.gameSetup ? GameSetupWidget() : Column(children: [
       Row(children: [
         WorkerClassBoardWidget(small: true),
         CapitalistClassBoardWidget(small: true),
-        MiddleClassBoardWidget(small: true)
+        boardState.numPlayers >= 3 ? MiddleClassBoardWidget(small: true) : SizedBox()
       ]),
       Row(children: [
         Column(children: [
@@ -90,79 +94,5 @@ class _GameBoardScreenState extends State<GameBoardScreen> {
         ]),
       ])
     ]);
-    //return CustomRenderBoxWidget();
-    //final automaState automaState = context.watch<automaState>();
-  }
-}
-
-class CustomRenderBoxWidget extends LeafRenderObjectWidget {
-  // ...
-
-  @override
-  RenderObject createRenderObject(BuildContext context) {
-    final box = CustomRenderBox();
-    // ...
-    return box;
-  }
-}
-
-class CustomRenderBox extends RenderBox with WidgetsBindingObserver {
-  // ...
-
-  /// Vsync loop ticker.
-  Ticker? _ticker;
-
-  @override
-  bool get isRepaintBoundary => true;
-
-  @override
-  bool get alwaysNeedsCompositing => false;
-
-  @override
-  bool get sizedByParent => true;
-
-  @override
-  Size computeDryLayout(BoxConstraints constraints) => constraints.biggest;
-
-  void _onTick(Duration elapsed) {
-    // ...
-    markNeedsPaint();
-  }
-
-  @override
-  void attach(PipelineOwner owner) {
-    super.attach(owner);
-    WidgetsBinding.instance.addObserver(this);
-    _ticker = Ticker(_onTick, debugLabel: 'CustomRenderBox')..start();
-    // ...
-  }
-
-  @override
-  void detach() {
-    _ticker?.dispose();
-    WidgetsBinding.instance.removeObserver(this);
-    super.detach();
-    // ...
-  }
-
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    final localBounds = Offset.zero & size;
-    final paint = Paint()..style = PaintingStyle.fill;
-
-    context.canvas
-      // Canvas background color
-      ..drawPaint(paint..color = const Color(0xFF00AAFF))
-      // Rectangle
-      ..drawRect(
-        localBounds.deflate(32),
-        paint..color = const Color(0xFF00FF1A),
-      )
-      // Circle
-      ..drawCircle(
-        localBounds.center,
-        localBounds.longestSide / 4,
-        paint..color = const Color(0xFFFFFFFF),
-      ); // ...
   }
 }

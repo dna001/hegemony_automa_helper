@@ -14,31 +14,50 @@ class PolicyWidget extends StatelessWidget {
   const PolicyWidget({super.key, this.small = false});
   final bool small;
 
+  Future<void> _detailsDialogue(BuildContext context) {
+    return showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            content: Container(
+                width: widthConstraint,
+                height: 400,
+                child: PolicyWidget()),
+          );
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
+    Widget policyRows = Padding(
+        padding: const EdgeInsets.fromLTRB(6, 6, 6, 6),
+        child: Column(children: <Widget>[
+          PolicyRow(info: policyCards[0], small: small),
+          colDivider,
+          PolicyRow(info: policyCards[1], small: small),
+          colDivider,
+          PolicyRow(info: policyCards[2], small: small),
+          colDivider,
+          PolicyRow(info: policyCards[3], small: small),
+          colDivider,
+          PolicyRow(info: policyCards[4], small: small),
+          colDivider,
+          PolicyRow(info: policyCards[5], small: small),
+          colDivider,
+          PolicyRow(info: policyCards[6], small: small),
+        ]));
+    Widget policyWidget = policyRows;
+    if (small) {
+      policyWidget = InkWell(onTap: () => _detailsDialogue(context), child: policyRows);
+    }
+
     return Material(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
           side: const BorderSide(color: Colors.orange, width: 2),
         ),
         color: Colors.black,
-        child: Padding(
-            padding: const EdgeInsets.fromLTRB(6, 6, 6, 6),
-            child: Column(children: <Widget>[
-              PolicyRow(info: policyCards[0], small: small),
-              colDivider,
-              PolicyRow(info: policyCards[1], small: small),
-              colDivider,
-              PolicyRow(info: policyCards[2], small: small),
-              colDivider,
-              PolicyRow(info: policyCards[3], small: small),
-              colDivider,
-              PolicyRow(info: policyCards[4], small: small),
-              colDivider,
-              PolicyRow(info: policyCards[5], small: small),
-              colDivider,
-              PolicyRow(info: policyCards[6], small: small),
-            ])));
+        child: policyWidget);
   }
 }
 
@@ -55,6 +74,21 @@ class PolicyRow extends StatefulWidget {
 class _PolicyRowState extends State<PolicyRow> {
   int? _selectedSlot = 0;
 
+  Widget _customSelectionCircle(bool isSelected) {
+    return Container(
+      width: 20,
+      height: 20,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: isSelected ? Colors.black : Colors.transparent,
+        border: Border.all(
+          color: Colors.black,
+          width: 2,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     BoardState boardState = context.watch<BoardState>();
@@ -65,34 +99,27 @@ class _PolicyRowState extends State<PolicyRow> {
     int clsC = (boardState.getItem(widget.info.key + "_bill") >> 8) & 0xf;
     Widget policyWidget = SizedBox();
     if (widget.small) {
-      policyWidget = RadioGroup<int>(
-          groupValue: _selectedSlot,
-          onChanged: (value) {},
-          child: Row(children: [
+      policyWidget = Padding(
+          padding: const EdgeInsets.fromLTRB(2, 2, 2, 2),
+          child:
+              Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+            Row(children: [
+              Text("A"),
+              SizedBox(width: 5),
+              _customSelectionCircle(_selectedSlot == 0)
+            ]),
             rowDivider,
-            Text("A"),
-            Radio<int>(
-                fillColor:
-                    WidgetStateColor.resolveWith((states) => Colors.black),
-                focusColor:
-                    WidgetStateColor.resolveWith((states) => Colors.black),
-                value: 0),
+            Row(children: [
+              Text("B"),
+              SizedBox(width: 5),
+              _customSelectionCircle(_selectedSlot == 1)
+            ]),
             rowDivider,
-            Text("B"),
-            Radio<int>(
-                fillColor:
-                    WidgetStateColor.resolveWith((states) => Colors.black),
-                focusColor:
-                    WidgetStateColor.resolveWith((states) => Colors.black),
-                value: 1),
-            rowDivider,
-            Text("C"),
-            Radio<int>(
-                fillColor:
-                    WidgetStateColor.resolveWith((states) => Colors.black),
-                focusColor:
-                    WidgetStateColor.resolveWith((states) => Colors.black),
-                value: 2)
+            Row(children: [
+              Text("C"),
+              SizedBox(width: 5),
+              _customSelectionCircle(_selectedSlot == 2)
+            ])
           ]));
     } else {
       policyWidget = Column(children: <Widget>[

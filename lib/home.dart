@@ -60,14 +60,10 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       case 0:
         return const OverviewScreen();
       case 1:
-        return const AutomaScreen(className: ClassName.Worker);
-      case 2:
-        return const AutomaScreen(className: ClassName.Capitalist);
-      case 3:
-        return const AutomaScreen(className: ClassName.Middle);
-      case 4:
         return const GameBoardScreen();
-      case 5:
+      case 2:
+        return AutomaScreen();
+      case 3:
         return const SettingsScreen();
       default:
         return const Text("Out of screens");

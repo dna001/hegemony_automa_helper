@@ -76,43 +76,27 @@ class SideNavbarX extends StatelessWidget {
           },
         ),
         SidebarXItem(
-          icon: Icons.factory,
-          label: 'WC Automa',
+          icon: Icons.games,
+          label: 'GameBoard',
           onTap: () {
             _controller.selectIndex(1);
             onSelectItem!(1);
           },
         ),
         SidebarXItem(
-          icon: Icons.money,
-          label: 'CC Automa',
+          icon: Icons.factory,
+          label: 'Automa',
           onTap: () {
             _controller.selectIndex(2);
             onSelectItem!(2);
           },
         ),
         SidebarXItem(
-          icon: Icons.work,
-          label: 'MC Automa',
-          onTap: () {
-            _controller.selectIndex(3);
-            onSelectItem!(3);
-          },
-        ),
-        SidebarXItem(
-          icon: Icons.games,
-          label: 'GameBoard',
-          onTap: () {
-            _controller.selectIndex(4);
-            onSelectItem!(4);
-          },
-        ),
-        SidebarXItem(
           icon: Icons.settings,
           label: 'Settings',
           onTap: () {
-            _controller.selectIndex(5);
-            onSelectItem!(5);
+            _controller.selectIndex(3);
+            onSelectItem!(3);
           },
         ),
       ],
@@ -125,14 +109,10 @@ String sideNavbarGetTitleByIndex(int index) {
     case 0:
       return 'Overview';
     case 1:
-      return 'WC Automa';
-    case 2:
-      return 'CC Automa';
-    case 3:
-      return 'MC Automa';
-    case 4:
       return 'GameBoard';
-    case 5:
+    case 2:
+      return 'Automa';
+    case 3:
       return 'Settings';
     default:
       return 'Page not found';

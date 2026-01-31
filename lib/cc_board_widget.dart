@@ -12,6 +12,8 @@ import 'victory_point_widget.dart';
 const rowDivider = SizedBox(width: 5);
 const colDivider = SizedBox(height: 5);
 const double widthConstraint = 450;
+const double smallWidthConstraint = 195;
+const double smallHeightConstraint = 102;
 
 class CapitalistClassBoardWidget extends StatefulWidget {
   CapitalistClassBoardWidget({this.small = false});
@@ -45,10 +47,10 @@ class _CapitalistClassBoardState extends State<CapitalistClassBoardWidget> {
 
     if (widget.small) {
       ccWidget = SizedBox(
-          width: 200,
-          height: 100,
+          width: smallWidthConstraint,
+          height: smallHeightConstraint,
           child: InkWell(
-              onTap: () =>_detailsDialogue(context),
+              onTap: () => _detailsDialogue(context),
               child: Column(
                 children: [
                   Text("CAPITALIST CLASS",

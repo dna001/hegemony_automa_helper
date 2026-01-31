@@ -59,7 +59,7 @@ class _AppState extends State<App> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-        future: context.read<AutomaState>().init(),
+        future: context.read<BoardState>().init(),
         initialData: Center(child: CircularProgressIndicator()),
         builder: (context, snapshot) {
           return MaterialApp(

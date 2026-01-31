@@ -32,6 +32,8 @@ enum WorkerType {
 enum CompanyType { Food, Luxury, Health, Education, Media, Any }
 
 class BoardState extends ChangeNotifier {
+  bool gameSetup = true;
+  int numPlayers = 2;
   int saveSlot = 0;
   Map<String, int> boardData = {};
   List<Map<String, int>> undoBoardData = [];
@@ -42,6 +44,17 @@ class BoardState extends ChangeNotifier {
 
   Future<void> init() async {
     await setSaveSlot(0);
+  }
+
+  void start() {
+    gameSetup = false;
+    _resetBoardState();
+    notifyListeners();
+  }
+
+  void setNumPlayers(int n) {
+    numPlayers = n < 2 ? 2 : n > 3 ? 3 : n;
+    notifyListeners();
   }
 
   Future<void> setSaveSlot(int slot) async {
@@ -108,24 +121,34 @@ class BoardState extends ChangeNotifier {
     boardData["mc_storage_health"] = 1;
     boardData["mc_storage_education"] = 0;
     boardData["mc_influence"] = 1;
-    addCompanyToSlot("mc_company_slot0", 100,
-        filled: true, cls: ClassName.Middle, slotLimit: 1); // DOCTOR'S OFFICE
-    addCompanyToSlot("mc_company_slot1", 101,
-        filled: true, cls: ClassName.Middle, slotLimit: 1); // CONVENIENCE STORE
-    boardData["mc_workers_unskilled"] = 1;
+    if (numPlayers >= 3) {
+      addCompanyToSlot("mc_company_slot0", 100,
+          filled: true, cls: ClassName.Middle, slotLimit: 1); // DOCTOR'S OFFICE
+      addCompanyToSlot("mc_company_slot1", 101,
+          filled: true, cls: ClassName.Middle, slotLimit: 1); // CONVENIENCE STORE
+      boardData["mc_workers_unskilled"] = 1;
+    }
     // State variables
     boardData["sc_vp"] = 0;
     boardData["sc_bill_markers"] = 3;
     boardData["sc_treasury"] = 120;
-    boardData["sc_storage_health"] = 6;
-    boardData["sc_storage_education"] = 6;
-    boardData["sc_storage_media"] = 4;
+    boardData["sc_storage_health"] = numPlayers > 2 ? 6 : 5;
+    boardData["sc_storage_education"] = numPlayers > 2 ? 6 : 5;
+    boardData["sc_storage_media"] = numPlayers > 2 ? 4 : 3;
     boardData["sc_influence"] = 1;
-    addCompanyToSlot("sc_company_slot0", 200,
-        filled: true, cls: ClassName.Worker); // UNIVERSITY HOSPITAL
-    addCompanyToSlot("sc_company_slot1", 201,
-        filled: true, cls: ClassName.Middle); // TECHNICAL UNIVERSITY
-    addCompanyToSlot("sc_company_slot2", 202); // NATIONAL PUBLIC BROADCASTING
+    if (numPlayers >= 3) {    
+      addCompanyToSlot("sc_company_slot0", 200,
+          filled: true, cls: ClassName.Worker); // UNIVERSITY HOSPITAL
+      addCompanyToSlot("sc_company_slot1", 201,
+          filled: true, cls: ClassName.Middle); // TECHNICAL UNIVERSITY
+      addCompanyToSlot("sc_company_slot2", 202); // NATIONAL PUBLIC BROADCASTING
+    } else {
+      addCompanyToSlot("sc_company_slot0", 203,
+          filled: true, cls: ClassName.Worker); // PUBLIC HOSPITAL
+      addCompanyToSlot("sc_company_slot1", 204,
+          filled: true, cls: ClassName.Middle); // PUBLIC UNIVERSITY
+      addCompanyToSlot("sc_company_slot2", 205); // REGIONAL TV STATION
+    }
   }
 
   void setItem(String key, int value) {
