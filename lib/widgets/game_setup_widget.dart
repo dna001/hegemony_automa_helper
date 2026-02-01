@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'data/board_state.dart';
+import '../data/board_state.dart';
 
 class GameSetupWidget extends StatefulWidget {
   const GameSetupWidget({super.key});
@@ -15,7 +15,6 @@ class GameSetupWidget extends StatefulWidget {
 }
 
 class _GameSetupWidgetState extends State<GameSetupWidget> {
-
   Future<void> _loadGameSelectionDialogue(BuildContext context) async {
     List<int> itemList = [];
     return showDialog(

@@ -3,17 +3,17 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import '../policy_widget.dart';
-import '../cc_board_widget.dart';
-import '../company_list_widget.dart';
-import '../mc_board_widget.dart';
-import '../wc_board_widget.dart';
-import '../state_area_widget.dart';
-import '../unemployed_workers_widget.dart';
-import '../export_widget.dart';
-import '../round_and_tax_widget.dart';
+import '../widgets/policy_widget.dart';
+import '../widgets/cc_board_widget.dart';
+import '../widgets/company_list_widget.dart';
+import '../widgets/mc_board_widget.dart';
+import '../widgets/wc_board_widget.dart';
+import '../widgets/state_area_widget.dart';
+import '../widgets/unemployed_workers_widget.dart';
+import '../widgets/export_widget.dart';
+import '../widgets/round_and_tax_widget.dart';
 import '../data/board_state.dart';
-import '../business_deals_widget.dart';
+import '../widgets/business_deals_widget.dart';
 
 const double mediumWidthBreakpoint = 900;
 const double largeWidthBreakpoint = 1350;

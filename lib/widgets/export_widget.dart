@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'data/board_state.dart';
+import '../data/board_state.dart';
 
 class ExportWidget extends StatelessWidget {
   const ExportWidget({super.key, this.id = -1, this.onAdd});

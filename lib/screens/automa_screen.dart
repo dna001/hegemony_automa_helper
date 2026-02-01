@@ -4,9 +4,9 @@
 
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
-import 'package:hegemony_automa_helper/automa_widget.dart';
-import 'package:hegemony_automa_helper/data/automa_state.dart';
-import 'package:hegemony_automa_helper/data/board_state.dart';
+import '../widgets/automa_widget.dart';
+import '../data/automa_state.dart';
+import '../data/board_state.dart';
 
 const rowDivider = SizedBox(width: 20);
 const colDivider = SizedBox(height: 10);

@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:hegemony_automa_helper/data/automa_state.dart';
+import 'package:hegemony_automa_helper/data/board_state.dart';
 import 'package:provider/provider.dart';
-import 'data/automa_state.dart';
-import 'data/board_state.dart';
 
 const rowDivider = SizedBox(width: 20);
 const colDivider = SizedBox(height: 10);

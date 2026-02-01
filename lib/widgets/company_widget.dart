@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'data/board_state.dart';
+import '../data/board_state.dart';
 
 const rowDivider = SizedBox(width: 20);
 const colDivider = SizedBox(height: 5);

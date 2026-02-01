@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'data/board_state.dart';
+import '../data/board_state.dart';
 import 'adjustable_value_widget.dart';
 import 'storage_area_widget.dart';
 import 'victory_point_widget.dart';
