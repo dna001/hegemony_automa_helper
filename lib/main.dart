@@ -6,6 +6,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/services.dart';
 //import 'package:window_size/window_size.dart';
 
 import 'constants.dart';
@@ -13,10 +14,12 @@ import 'home.dart';
 import 'data/automa_state.dart';
 import 'data/board_state.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-    WidgetsFlutterBinding.ensureInitialized();
     //setWindowMinSize(const Size(800, 500));
+  } else if (Platform.isAndroid) {
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   }
   runApp(MultiProvider(
     providers: [
@@ -58,6 +61,9 @@ class _AppState extends State<App> {
 
   @override
   Widget build(BuildContext context) {
+    final double width = MediaQuery.of(context).size.width;
+    final double height = MediaQuery.of(context).size.height;
+    print("main resolution w: $width h: $height");
     return FutureBuilder(
         future: context.read<BoardState>().init(),
         initialData: Center(child: CircularProgressIndicator()),

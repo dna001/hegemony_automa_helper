@@ -6,10 +6,11 @@ Todo:
   - Change layout depending on screen size for Gameboard Screen (currently fixed size for 800x1280).
   - Change automa to include cards.
   - Add class player board screens that will cover automa if selected for that class.
-  - Add BLE support to be able to connect players to main gameboard host.
   - Add support for undo and save each change for BoardState.
   - Add action log.
   - Add action buttons on Gameboard Screen.
   - Add support for strike and demonstration (Worker class actions).
   - Add info on phase and active class.
   - Add support to click the small policy widget to show enlarged editable version.
+  - Add resource pay/move popup dialogue to handle transfer of resource between different areas.
+  - Add BLE support to be able to connect players to main gameboard host.

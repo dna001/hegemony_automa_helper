@@ -7,6 +7,7 @@ import '../widgets/policy_widget.dart';
 import '../widgets/cc_board_widget.dart';
 import '../widgets/company_list_widget.dart';
 import '../widgets/mc_board_widget.dart';
+import '../widgets/public_services_widget.dart';
 import '../widgets/wc_board_widget.dart';
 import '../widgets/state_area_widget.dart';
 import '../widgets/unemployed_workers_widget.dart';
@@ -87,6 +88,10 @@ class _OverviewScreenState extends State<OverviewScreen> {
           child: Padding(
               padding: const EdgeInsets.fromLTRB(16.0, 20, 16.0, 0),
               child: StateAreaWidget())),
+      SliverToBoxAdapter(
+          child: Padding(
+              padding: const EdgeInsets.fromLTRB(16.0, 20, 16.0, 0),
+              child: PublicServices())),
       SliverToBoxAdapter(
           child: Padding(
               padding: const EdgeInsets.fromLTRB(16.0, 20, 16.0, 0),

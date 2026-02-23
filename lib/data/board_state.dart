@@ -7,6 +7,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 enum ClassName { None, Worker, Capitalist, Middle, State }
 
+enum Phase {
+  Preparation,
+  Action,
+  Production,
+  Election,
+  Scoring
+}
+
 enum WorkerType {
   None,
   WcUnskilled,
@@ -33,10 +41,12 @@ enum CompanyType { Food, Luxury, Health, Education, Media, Any }
 
 class BoardState extends ChangeNotifier {
   bool gameSetup = true;
+  Phase phase = Phase.Preparation;
   int numPlayers = 2;
   int saveSlot = 0;
   Map<String, int> boardData = {};
   List<Map<String, int>> undoBoardData = [];
+  ClassName activePlayer = ClassName.Worker;
 
   BoardState() {
     _resetBoardState();
@@ -168,6 +178,40 @@ class BoardState extends ChangeNotifier {
       boardData[key] = 0;
     }
     notifyListeners();
+  }
+
+  void setPolicy(String policyKey, int value) {
+    boardData[policyKey] = value;
+    // Handle Fiscal Policy change
+    if (policyKey.contains("policy_fp")) {
+      int companyCount = countCompanies("sc_company_slot");
+      int companyMaxCount = value == 0 ? 9 : value == 1 ? 6 : 3;
+      if (companyCount < companyMaxCount) {
+        // Buy new companies
+        for (int i = 0; i < (companyMaxCount - companyCount) ~/ 3; i++) {
+          addCompanyToFreeSlot("sc_company_slot", 203, pay: true); // PUBLIC HOSPITAL
+          addCompanyToFreeSlot("sc_company_slot", 204, pay: true); // PUBLIC UNIVERSITY
+          addCompanyToFreeSlot("sc_company_slot", 205, pay: true); // REGIONAL TV STATION
+        }
+        // TODO: Check if State need to take loan(s)
+      } else if (companyCount > companyMaxCount) {
+        // Sell companies
+        while(companyCount > companyMaxCount) {
+          sellCompany("sc_company_slot", companyCount - 1);
+          companyCount--;
+        }
+      }
+    }
+  }
+
+  int countCompanies(String keyBase) {
+    int count = 0;
+    for (int slot = 0; slot < 16; slot++) {
+      if (getItem(keyBase + slot.toString() + "_id") != 0) {
+        count++;
+      }
+    }
+    return count;
   }
 
   void addCompanyToSlot(String keyBase, int id,
@@ -535,6 +579,7 @@ class BoardState extends ChangeNotifier {
       policyBill |= newPolicyBillClass << (slot * 4);
       setItem(policyKey + "_bill", policyBill);
     }
+
     print("Policy bill $policyKey, $slot, policyBill: $policyBill");
   }
 

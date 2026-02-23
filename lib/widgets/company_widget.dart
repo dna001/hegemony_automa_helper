@@ -218,7 +218,9 @@ class _CompanyWidgetState extends State<CompanyWidget> {
               : null));
     }
 
-    Widget companyWidget = Column(children: <Widget>[
+    Widget companyWidget = Column(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
       Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: <Widget>[
         Text(widget.info.name,
             style: (widget.mode == CompanyViewMode.small)

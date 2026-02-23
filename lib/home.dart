@@ -5,7 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:sidebarx/sidebarx.dart';
 
-import '../data/board_state.dart';
 import 'screens/automa_screen.dart';
 import 'screens/gameboard_screen.dart';
 import 'screens/overview_screen.dart';
@@ -81,38 +80,26 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Builder(
       builder: (context) {
-        final isSmallScreen = true; //MediaQuery.of(context).size.width < 500;
         return Scaffold(
           key: _scaffoldKey,
-          appBar: isSmallScreen
-              ? AppBar(
-                  backgroundColor: Colors.black,
-                  title: Text(sideNavbarGetTitleByIndex(screenIndex)),
-                  leading: IconButton(
-                    onPressed: () {
-                      // if (!Platform.isAndroid && !Platform.isIOS) {
-                      //   _controller.setExtended(true);
-                      // }
-                      _scaffoldKey.currentState?.openDrawer();
-                    },
-                    icon: const Icon(Icons.menu),
-                  ),
-                )
-              : null,
+          appBar: AppBar(
+            backgroundColor: Colors.black,
+            title: Text(sideNavbarGetTitleByIndex(screenIndex)),
+            leading: IconButton(
+              onPressed: () {
+                // if (!Platform.isAndroid && !Platform.isIOS) {
+                //   _controller.setExtended(true);
+                // }
+                _scaffoldKey.currentState?.openDrawer();
+              },
+              icon: const Icon(Icons.menu),
+            ),
+          ),
           drawer: SideNavbarX(
               controller: _controller, onSelectItem: handleScreenChanged),
-          body: Row(
-            children: [
-              if (!isSmallScreen)
-                SideNavbarX(
-                    controller: _controller, onSelectItem: handleScreenChanged),
-              Expanded(
-                child: Center(
-                  child: createScreenFor(screenIndex),
-                ),
-              ),
-            ],
-          ),
+          body: Center(
+              child: createScreenFor(screenIndex),
+            ),
         );
       },
     );

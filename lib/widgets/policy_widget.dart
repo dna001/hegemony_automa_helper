@@ -8,21 +8,23 @@ import '../data/board_state.dart';
 
 const rowDivider = SizedBox(width: 50);
 const colDivider = SizedBox(height: 2);
-const double widthConstraint = 450;
+//const double widthConstraint = 450;
 
 class PolicyWidget extends StatelessWidget {
   const PolicyWidget({super.key, this.small = false});
   final bool small;
 
   Future<void> _detailsDialogue(BuildContext context) {
+    final double widthContraints = MediaQuery.of(context).size.width / 2;
     return showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            content: Container(
-                width: widthConstraint,
-                height: 400,
-                child: PolicyWidget()),
+            content: PolicyWidget()
+            /*Container(
+                width: widthContraints,
+                //height: 400,
+                child: PolicyWidget()),*/
           );
         });
   }
@@ -31,7 +33,9 @@ class PolicyWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget policyRows = Padding(
         padding: const EdgeInsets.fromLTRB(6, 6, 6, 6),
-        child: Column(children: <Widget>[
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
           PolicyRow(info: policyCards[0], small: small),
           colDivider,
           PolicyRow(info: policyCards[1], small: small),
@@ -127,7 +131,7 @@ class _PolicyRowState extends State<PolicyRow> {
         RadioGroup<int>(
             groupValue: _selectedSlot,
             onChanged: (value) {
-              boardState.setItem(widget.info.key, value ?? 0);
+              boardState.setPolicy(widget.info.key, value ?? 0);
             },
             child: Row(children: <Widget>[
               rowDivider,

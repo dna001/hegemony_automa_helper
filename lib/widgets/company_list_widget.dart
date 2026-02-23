@@ -30,6 +30,8 @@ class CompanyListWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     BoardState boardState = context.watch<BoardState>();
+    int maxSlots = columns * rows;
+    int usedSlots = boardState.usedCompanySlots(cls);
 
     return Material(
         shape: RoundedRectangleBorder(
@@ -68,27 +70,36 @@ class CompanyListWidget extends StatelessWidget {
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: columns,
                       crossAxisSpacing: 2.0,
-                      childAspectRatio: 1.0),
-                  itemCount: boardState.usedCompanySlots(cls),
-                  itemBuilder: (context, index) => CompanyWidget(
-                      info: boardState.companyInfo(boardState
-                          .getItem(bsKeyBase + index.toString() + "_id"))!,
-                      mode: CompanyViewMode.small,
-                      onTap: () => companyDetailsDialogue(
-                          context,
-                          boardState.companyInfo(boardState
+                      childAspectRatio: 1.0,
+                      mainAxisExtent: 110),
+                  itemCount: usedSlots < maxSlots ? usedSlots + 1 : usedSlots,
+                  itemBuilder: (context, index) => index < usedSlots
+                      ? CompanyWidget(
+                          info: boardState.companyInfo(boardState
                               .getItem(bsKeyBase + index.toString() + "_id"))!,
-                          index),
-                      bsKeyBase: bsKeyBase,
-                      slot: index),
+                          mode: CompanyViewMode.small,
+                          onTap: () => companyDetailsDialogue(
+                              context,
+                              boardState.companyInfo(boardState.getItem(
+                                  bsKeyBase + index.toString() + "_id"))!,
+                              index),
+                          bsKeyBase: bsKeyBase,
+                          slot: index)
+                      : IconButton(
+                          icon: Icon(Icons.add),
+                          onPressed: () => companyListDialogue(
+                              context,
+                              (id) => boardState.addCompanyToFreeSlot(
+                                  bsKeyBase, id,
+                                  pay: true))),
                 ),
               ),
-              IconButton(
+              /*IconButton(
                   icon: Icon(Icons.add),
                   onPressed: () => companyListDialogue(
                       context,
                       (id) => boardState.addCompanyToFreeSlot(bsKeyBase, id,
-                          pay: true))),
+                          pay: true))),*/
             ])));
   }
 
@@ -127,7 +138,6 @@ class CompanyListWidget extends StatelessWidget {
           return AlertDialog(
             content: Container(
               width: widthConstraint,
-              height: 200,
               child: CompanyWidget(
                   info: info,
                   mode: CompanyViewMode.edit,
