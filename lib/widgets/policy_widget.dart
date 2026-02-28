@@ -15,17 +15,15 @@ class PolicyWidget extends StatelessWidget {
   final bool small;
 
   Future<void> _detailsDialogue(BuildContext context) {
-    final double widthContraints = MediaQuery.of(context).size.width / 2;
     return showDialog(
         context: context,
         builder: (BuildContext context) {
-          return AlertDialog(
-            content: PolicyWidget()
-            /*Container(
+          return AlertDialog(content: PolicyWidget()
+              /*Container(
                 width: widthContraints,
                 //height: 400,
                 child: PolicyWidget()),*/
-          );
+              );
         });
   }
 
@@ -33,9 +31,7 @@ class PolicyWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget policyRows = Padding(
         padding: const EdgeInsets.fromLTRB(6, 6, 6, 6),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
+        child: Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
           PolicyRow(info: policyCards[0], small: small),
           colDivider,
           PolicyRow(info: policyCards[1], small: small),
@@ -52,7 +48,8 @@ class PolicyWidget extends StatelessWidget {
         ]));
     Widget policyWidget = policyRows;
     if (small) {
-      policyWidget = InkWell(onTap: () => _detailsDialogue(context), child: policyRows);
+      policyWidget =
+          InkWell(onTap: () => _detailsDialogue(context), child: policyRows);
     }
 
     return Material(

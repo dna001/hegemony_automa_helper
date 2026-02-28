@@ -5,15 +5,11 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'action_log.dart';
+
 enum ClassName { None, Worker, Capitalist, Middle, State }
 
-enum Phase {
-  Preparation,
-  Action,
-  Production,
-  Election,
-  Scoring
-}
+enum Phase { Preparation, Action, Production, Election, Scoring }
 
 enum WorkerType {
   None,
@@ -39,6 +35,27 @@ enum WorkerType {
 
 enum CompanyType { Food, Luxury, Health, Education, Media, Any }
 
+enum ClassMode { Human, Automa }
+
+class PlayerClass {
+  ClassMode mode = ClassMode.Human;
+  int vp = 0;
+  int billMarkers = 3;
+  int money = 0;
+}
+
+class WorkerClass extends PlayerClass {
+}
+
+class CapitalistClass extends PlayerClass {
+}
+
+class MiddleClass extends PlayerClass {
+}
+
+class StateClass extends PlayerClass {
+}
+
 class BoardState extends ChangeNotifier {
   bool gameSetup = true;
   Phase phase = Phase.Preparation;
@@ -47,6 +64,8 @@ class BoardState extends ChangeNotifier {
   Map<String, int> boardData = {};
   List<Map<String, int>> undoBoardData = [];
   ClassName activePlayer = ClassName.Worker;
+  ActionLog actionLog = ActionLog();
+  List<PlayerClass> players = [WorkerClass(), CapitalistClass(), MiddleClass(), StateClass()];
 
   BoardState() {
     _resetBoardState();
@@ -63,15 +82,22 @@ class BoardState extends ChangeNotifier {
   }
 
   void setNumPlayers(int n) {
-    numPlayers = n < 2 ? 2 : n > 3 ? 3 : n;
+    numPlayers = n < 2
+        ? 2
+        : n > 3
+            ? 3
+            : n;
     notifyListeners();
+  }
+
+  void setClassMode(ClassMode mode) {
   }
 
   Future<void> setSaveSlot(int slot) async {
     // Set save slot and load state
     saveSlot = slot;
-    await load(slot: slot);
-    notifyListeners();
+    //await load(slot: slot);
+    //notifyListeners();
   }
 
   void _resetBoardState() {
@@ -135,7 +161,9 @@ class BoardState extends ChangeNotifier {
       addCompanyToSlot("mc_company_slot0", 100,
           filled: true, cls: ClassName.Middle, slotLimit: 1); // DOCTOR'S OFFICE
       addCompanyToSlot("mc_company_slot1", 101,
-          filled: true, cls: ClassName.Middle, slotLimit: 1); // CONVENIENCE STORE
+          filled: true,
+          cls: ClassName.Middle,
+          slotLimit: 1); // CONVENIENCE STORE
       boardData["mc_workers_unskilled"] = 1;
     }
     // State variables
@@ -146,7 +174,7 @@ class BoardState extends ChangeNotifier {
     boardData["sc_storage_education"] = numPlayers > 2 ? 6 : 5;
     boardData["sc_storage_media"] = numPlayers > 2 ? 4 : 3;
     boardData["sc_influence"] = 1;
-    if (numPlayers >= 3) {    
+    if (numPlayers >= 3) {
       addCompanyToSlot("sc_company_slot0", 200,
           filled: true, cls: ClassName.Worker); // UNIVERSITY HOSPITAL
       addCompanyToSlot("sc_company_slot1", 201,
@@ -185,18 +213,25 @@ class BoardState extends ChangeNotifier {
     // Handle Fiscal Policy change
     if (policyKey.contains("policy_fp")) {
       int companyCount = countCompanies("sc_company_slot");
-      int companyMaxCount = value == 0 ? 9 : value == 1 ? 6 : 3;
+      int companyMaxCount = value == 0
+          ? 9
+          : value == 1
+              ? 6
+              : 3;
       if (companyCount < companyMaxCount) {
         // Buy new companies
         for (int i = 0; i < (companyMaxCount - companyCount) ~/ 3; i++) {
-          addCompanyToFreeSlot("sc_company_slot", 203, pay: true); // PUBLIC HOSPITAL
-          addCompanyToFreeSlot("sc_company_slot", 204, pay: true); // PUBLIC UNIVERSITY
-          addCompanyToFreeSlot("sc_company_slot", 205, pay: true); // REGIONAL TV STATION
+          addCompanyToFreeSlot("sc_company_slot", 203,
+              pay: true); // PUBLIC HOSPITAL
+          addCompanyToFreeSlot("sc_company_slot", 204,
+              pay: true); // PUBLIC UNIVERSITY
+          addCompanyToFreeSlot("sc_company_slot", 205,
+              pay: true); // REGIONAL TV STATION
         }
         // TODO: Check if State need to take loan(s)
       } else if (companyCount > companyMaxCount) {
         // Sell companies
-        while(companyCount > companyMaxCount) {
+        while (companyCount > companyMaxCount) {
           sellCompany("sc_company_slot", companyCount - 1);
           companyCount--;
         }
@@ -295,7 +330,8 @@ class BoardState extends ChangeNotifier {
       setItem(thisSlot + "_worker2", getItem(nextSlot + "_worker2"));
       setItem(thisSlot + "_price", getItem(nextSlot + "_price"));
       setItem(thisSlot + "_commited", getItem(nextSlot + "_commited"));
-      setItem(thisSlot + "_extra_production", getItem(nextSlot + "_extra_production"));
+      setItem(thisSlot + "_extra_production",
+          getItem(nextSlot + "_extra_production"));
       setItem(nextSlot + "_id", 0);
     }
   }

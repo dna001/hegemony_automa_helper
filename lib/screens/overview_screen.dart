@@ -101,8 +101,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
                   borderColor: Colors.grey,
                   bsKeyBase: "sc_company_slot",
                   columns: 3,
-                  rows: 3
-      ))),
+                  rows: 3))),
     ];
   }
 

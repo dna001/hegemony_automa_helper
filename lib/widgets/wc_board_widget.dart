@@ -291,7 +291,7 @@ class UnionWidget extends StatelessWidget {
           height: 20,
           //padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
           child: Icon(Icons.person,
-              color: active ? color : color.withOpacity(0.5))),
+              color: active ? color : color.withAlpha(128))),
     );
   }
 }

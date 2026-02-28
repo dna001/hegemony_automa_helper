@@ -3,7 +3,6 @@ Todo:
    1. Automa only (board + cards + player boards needed)
    2. Board state + Automa (only cards needed)
   - Switch to using Gameboard Screen instead of Overview Screen.
-  - Change layout depending on screen size for Gameboard Screen (currently fixed size for 800x1280).
   - Change automa to include cards.
   - Add class player board screens that will cover automa if selected for that class.
   - Add support for undo and save each change for BoardState.
@@ -14,3 +13,6 @@ Todo:
   - Add support to click the small policy widget to show enlarged editable version.
   - Add resource pay/move popup dialogue to handle transfer of resource between different areas.
   - Add BLE support to be able to connect players to main gameboard host.
+
+Done:
+  - Change layout depending on screen size for Gameboard Screen (currently fixed size for 800x1280).

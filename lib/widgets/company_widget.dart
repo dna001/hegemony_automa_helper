@@ -218,9 +218,8 @@ class _CompanyWidgetState extends State<CompanyWidget> {
               : null));
     }
 
-    Widget companyWidget = Column(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
+    Widget companyWidget =
+        Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
       Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: <Widget>[
         Text(widget.info.name,
             style: (widget.mode == CompanyViewMode.small)
@@ -242,7 +241,7 @@ class _CompanyWidgetState extends State<CompanyWidget> {
           padding: const EdgeInsets.fromLTRB(4, 4, 4, 4),
           child: Material(
               borderRadius: BorderRadius.all(Radius.circular(10.0)),
-              color: Colors.black.withOpacity(0.4),
+              color: Colors.black.withAlpha(96),
               child: Column(children: <Widget>[
                 productionRow,
                 (widget.info.workerSlots.length > 0)
@@ -314,7 +313,7 @@ class WorkerWidget extends StatelessWidget {
             : Icon(workerBaseIconData,
                 color: (workerIconData != null)
                     ? Colors.grey
-                    : iconColor.withOpacity(0.5),
+                    : iconColor.withAlpha(128),
                 size: iconSize)
       ]),
     );

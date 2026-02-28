@@ -66,10 +66,11 @@ class _GameBoardScreenState extends State<GameBoardScreen> {
             ]),
             Row(children: [
               SizedBox(
-                  width: widthConstraint, child:
-                  Row(children: [
-              BusinessDealsWidget(),
-              Expanded(child: ExportWidget())])),
+                  width: widthConstraint,
+                  child: Row(children: [
+                    BusinessDealsWidget(),
+                    Expanded(child: ExportWidget())
+                  ])),
               Expanded(child: PublicServices(small: true))
             ]),
             Row(children: [

@@ -39,7 +39,6 @@ class _MiddleClassBoardState extends State<MiddleClassBoardWidget> {
         });
   }
 
-
   @override
   Widget build(BuildContext context) {
     BoardState boardState = context.watch<BoardState>();
@@ -65,8 +64,7 @@ class _MiddleClassBoardState extends State<MiddleClassBoardWidget> {
                     child: ProseprityRadioListTile<int>(
                       value: _prosperity ?? 0,
                       groupValue: _prosperity ?? 0,
-                      onChanged: (value) {
-                      },
+                      onChanged: (value) {},
                     )),
                 Icon(Icons.person, color: Colors.yellow),
                 rowDivider,
@@ -84,10 +82,10 @@ class _MiddleClassBoardState extends State<MiddleClassBoardWidget> {
                 Icon(Icons.money, color: Colors.yellow),
                 rowDivider,
                 Text(boardState.getItem("mc_income").toString() + "£",
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleMedium!
-                      .copyWith(color: Colors.orange)),
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleMedium!
+                        .copyWith(color: Colors.orange)),
               ]),
             ]),
           ));

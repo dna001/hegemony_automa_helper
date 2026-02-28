@@ -54,22 +54,12 @@ class _SaveSlotButtonsState extends State<SaveSlotButtons> {
     final List<Widget> widgets = <Widget>[];
     _selectedSlot = automaState.saveSlot;
     for (int i = 0; i < 5; i++) {
-      widgets.add(
-          /*ListTile(
-        title: Text(i.toString()),
-        leading: */
-          Radio<int>(
+      widgets.add(Radio<int>(
         fillColor: WidgetStateColor.resolveWith((states) => Colors.white),
         focusColor: WidgetStateColor.resolveWith((states) => Colors.white),
         value: i,
-        groupValue: _selectedSlot,
-        onChanged: (value) {
-          automaState.setSaveSlot(value ?? 0);
-        },
-        //),
       ));
     }
-
     return Material(
       borderRadius: BorderRadius.all(Radius.circular(10.0)),
       color: Colors.blueGrey,
@@ -84,7 +74,12 @@ class _SaveSlotButtonsState extends State<SaveSlotButtons> {
                 .copyWith(color: Colors.white),
           ),
           rowDivider,
-          ...widgets,
+          RadioGroup<int>(
+              groupValue: _selectedSlot,
+              onChanged: (value) {
+                automaState.setSaveSlot(value ?? 0);
+              },
+              child: Row(children: widgets))
         ],
       ),
     );
